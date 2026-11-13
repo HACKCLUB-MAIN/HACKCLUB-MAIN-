@@ -571,13 +571,9 @@ func _on_action(action: String, _b: Button) -> void:
 		"start":
 			_busy = true
 			_play("confirm", 1.0, -4)
-			_overlay.visible = true
-			_overlay.color.a = 0.0
-			var tw := create_tween()
-			tw.tween_property(_overlay, "color:a", 1.0, 0.5)\
-				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-			await tw.finished
-			# launch the Bounce Back game from level 1
+			# seamless hand-off: the TV shell is drawn identically in the
+			# menu and in the game, so the game simply starts inside the
+			# same frame - no black screen in between
 			GameState.start_level(1)
 		"shop":
 			_popup_open("SHOP", "", _b, [{"widget": "_fill_shop"}])

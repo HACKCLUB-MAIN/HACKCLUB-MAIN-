@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
 [ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
 [ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
+[ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="8_lava"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
 size = Vector2(512, 128)
@@ -82,9 +83,12 @@ polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
 
-[node name="PitDeco" type="Polygon2D" parent="."]
-color = Color(0.78, 0.14, 0.14, 1)
-polygon = PackedVector2Array(512, 648, 512, 620, 520, 598, 528, 620, 536, 598, 544, 620, 552, 598, 560, 620, 568, 598, 576, 620, 584, 598, 592, 620, 600, 598, 608, 620, 616, 598, 624, 620, 632, 598, 640, 620, 640, 648)
+[node name="PitLava" parent="." instance=ExtResource("8_lava")]
+position = Vector2(576, 600)
+width = 132.0
+depth = 48.0
+surface_y = -2.0
+bubble_count = 5
 
 [node name="Pit" parent="." instance=ExtResource("7_kill")]
 position = Vector2(576, 600)
@@ -114,4 +118,4 @@ position = Vector2(816, 408)
 position = Vector2(1040, 494)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(64, 506)
+position = Vector2(160, 506)

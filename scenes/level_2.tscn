@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
 [ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
 [ext_resource type="PackedScene" path="res://scenes/bounce_pad.tscn" id="8_bounce"]
+[ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="9_lava"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
 size = Vector2(640, 128)
@@ -105,9 +106,11 @@ polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
 
-[node name="SpikeDeco" type="Polygon2D" parent="."]
-color = Color(0.78, 0.14, 0.14, 1)
-polygon = PackedVector2Array(800, 520, 808, 494, 816, 520, 824, 494, 832, 520, 840, 494, 848, 520, 856, 494, 864, 520, 872, 494, 880, 520)
+[node name="LavaPool" parent="." instance=ExtResource("9_lava")]
+position = Vector2(840, 518)
+width = 84.0
+depth = 30.0
+bubble_count = 4
 
 [node name="SpikeKill" parent="." instance=ExtResource("7_kill")]
 position = Vector2(840, 560)
@@ -140,4 +143,4 @@ position = Vector2(900, 408)
 position = Vector2(1040, 494)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(64, 506)
+position = Vector2(160, 506)
