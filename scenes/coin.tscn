@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/coin.gd" id="1_scr"]
+[ext_resource type="AudioStream" path="res://assets/sfx/coin.ogg" id="2_sfx"]
+
+[sub_resource type="CircleShape2D" id="Shape_coin"]
+radius = 13.0
+
+[node name="Coin" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_scr")
+
+[node name="Sprite" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-12, 0, -8.5, -8.5, 0, -12, 8.5, -8.5, 12, 0, 8.5, 8.5, 0, 12, -8.5, 8.5)
+color = Color(1, 0.8, 0.2, 1)
+
+[node name="Shine" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-6, -4, -2, -7, 2, -4, -2, -1)
+color = Color(1, 1, 0.85, 0.9)
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("Shape_coin")
+
+[node name="CoinSfx" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_sfx")
+volume_db = -5.0
+bus = &"SFX"
