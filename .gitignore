@@ -1,2 +1,13 @@
 # Godot 4 generated cache
 .godot/
+
+# local-only junk - keep on disk, never track
+repo/
+new-game-project/
+assets/_downloads/
+assets/impact-sounds/
+assets/interface-sounds/
+assets/music-jingles/
+assets/pixel-platformer/
+assets/simplified-platformer-pack/
+assets/sfx.zip
