@@ -11,7 +11,6 @@ extends Control
 ## pulsing year chip, breathing TV, random CRT glitches.
 
 # ------------------------------------------------------------------ assets --
-const IMG_TV := "res://assets/images/tv_screen.png"
 const IMG_CLOUDS: Array[String] = [
 	"res://assets/images/cloud_1.png",
 	"res://assets/images/cloud_2.png",
@@ -46,8 +45,7 @@ const SFX := {
 }
 
 # ------------------------------------------------------------------ layout --
-# Inner screen ("glass") rectangle of the TV art, measured as fractions.
-const GLASS_F := Rect2(62.0 / 1199.0, 40.0 / 938.0, 1083.0 / 1199.0, 845.0 / 938.0)
+# The screen fills the whole page edge-to-edge (no TV frame).
 
 const F_YEAR := 0.175        # "2026" chip line
 const F_TITLE := 0.305       # big title center line
@@ -56,7 +54,17 @@ const F_BUTTONS := 0.575      # top of the button stack
 const F_FOOTER := 0.96        # copyright line
 
 # palette (measured from the provided art)
-const COL_ROOM := Color8(70, 60, 43)
+const COL_ROOM := Color8(10, 10, 13)
+
+# blackstone ground strip on the homepage glass — same block mixture as the
+# in-game terrain so the homepage matches what you see inside the game
+const TEX_STONE := "res://ITCH ASSETS/Minecraft Textures/block/polished_blackstone_bricks.png"
+const TEX_STONE_CRACKED := "res://ITCH ASSETS/Minecraft Textures/block/cracked_polished_blackstone_bricks.png"
+const TEX_STONE_GILDED := "res://ITCH ASSETS/Minecraft Textures/block/gilded_blackstone.png"
+const STONE_PX := 32.0
+const GROUND_F := 0.16          # ground strip height as a share of the glass
+const GROUND_MIX_CRACKED := 0.22
+const GROUND_MIX_GILDED := 0.10
 const COL_CREAM := Color8(247, 230, 196)
 const COL_INK := Color8(56, 42, 30)
 const COL_TEXT := Color8(86, 62, 40)
@@ -65,7 +73,7 @@ const COL_TITLE := Color8(246, 216, 158)
 const TITLE_H := 136.0       # height of the title band, logical px
 
 # ------------------------------------------------------------------ state ---
-var _tv_tex: Texture2D
+var _tv_root: Control
 var _font_pixel: Font
 var _font_title: FontVariation
 var _crt_mat: ShaderMaterial
@@ -73,7 +81,6 @@ var _noise_base := 0.03
 var _noise_burst_t := 0.0
 var _pulse := 0.0
 
-var _tv_root: Control
 var _screen: Control
 var _cloud_root: Control
 var _title_node: Control
@@ -97,6 +104,13 @@ var _overlay: ColorRect
 
 var _buttons: Array[Dictionary] = []
 var _clouds: Array[Dictionary] = []
+
+# homepage blackstone ground
+var _ground_root: Node2D = null
+var _ground_size := Vector2.ZERO
+var _stone_base: Texture2D
+var _stone_cracked: Texture2D
+var _stone_gilded: Texture2D
 var _tweens: Dictionary = {}          # Control -> active scale tween
 
 var _intro_done := false
@@ -110,7 +124,6 @@ var _sfx_cache: Dictionary = {}
 
 # ==================================================================== ready ==
 func _ready() -> void:
-	_tv_tex = load(IMG_TV)
 	_font_pixel = load(FONT_PIXEL)
 	_font_title = FontVariation.new()
 	_font_title.base_font = load(FONT_CHUNK)
@@ -212,27 +225,40 @@ func _build_ui() -> void:
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
 
-	# the TV (keep-aspect fitted; _layout() positions it)
+	# the screen takes the WHOLE page - no TV bezel, no border on any side
 	_tv_root = Control.new()
 	_tv_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_tv_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_tv_root)
 
-	var tv := TextureRect.new()
-	tv.texture = _tv_tex
-	tv.set_anchors_preset(Control.PRESET_FULL_RECT)
-	tv.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tv.stretch_mode = TextureRect.STRETCH_SCALE
-	tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_tv_root.add_child(tv)
-
-	# glass screen: logical anchor area for everything "on screen"
-	# (clipped: nothing escapes the curved glass of the CRT)
+	# screen: logical anchor area for everything (clipped to the page)
 	_screen = Control.new()
 	_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_screen.clip_contents = true
 	_screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tv_root.add_child(_screen)
+
+	# blacky dusk sky on the glass — matches the dark look inside the game;
+	# the same cloud sprites drift over it so the "sky" stays the same
+	var sky := TextureRect.new()
+	var sky_grad := Gradient.new()
+	sky_grad.set_color(0, Color8(4, 4, 8))
+	sky_grad.set_color(1, Color8(17, 18, 25))
+	var sky_tex := GradientTexture2D.new()
+	sky_tex.gradient = sky_grad
+	sky_tex.fill_from = Vector2(0, 0)
+	sky_tex.fill_to = Vector2(0, 1)
+	sky.texture = sky_tex
+	sky.set_anchors_preset(Control.PRESET_FULL_RECT)
+	sky.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_screen.add_child(sky)
+
+	# blackstone ground at the bottom of the glass (rebuilt in _layout)
+	_stone_base = _stone_tex(TEX_STONE)
+	_stone_cracked = _stone_tex(TEX_STONE_CRACKED)
+	_stone_gilded = _stone_tex(TEX_STONE_GILDED)
+	_ground_root = Node2D.new()
+	_screen.add_child(_ground_root)
 
 	# clouds live under the UI
 	_cloud_root = Control.new()
@@ -256,22 +282,22 @@ func _build_ui() -> void:
 	_title_float.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_node.add_child(_title_float)
 
-	var title_back := _mk_label("DUSKVALE", _font_title, 104, COL_INK, COL_INK, 6)
+	var title_back := _mk_label("AFTER IMAGE", _font_title, 104, COL_INK, COL_INK, 6)
 	title_back.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title_back.offset_left = 8
 	title_back.offset_top = 13
 	title_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_float.add_child(title_back)
 
-	var title_main := _mk_label("DUSKVALE", _font_title, 104, COL_TITLE, COL_INK, 6,
+	var title_main := _mk_label("AFTER IMAGE", _font_title, 104, COL_TITLE, COL_INK, 6,
 		COL_INK, Vector2(0, 5))
 	title_main.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title_main.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_float.add_child(title_main)
 
-	# subtitle
-	_sub_label = _mk_label("A  PIXEL  ADVENTURE", _font_pixel, 22, COL_INK,
-		Color8(247, 230, 196, 110), 4)
+	# subtitle line = the credit (who cooked this game)
+	_sub_label = _mk_label("COOKED BY Ziad - Ahmed - Affan", _font_pixel, 22,
+		COL_TITLE, Color8(247, 230, 196, 110), 4)
 	_anchor_line(_sub_label, F_SUB)
 	_screen.add_child(_sub_label)
 
@@ -304,7 +330,7 @@ func _build_ui() -> void:
 	_icon_row.add_child(_settings_btn)
 
 	# footer
-	_footer = _mk_label("C 2026  DUSKVALE TEAM", _font_pixel, 10, Color8(250, 238, 210, 210))
+	_footer = _mk_label("C 2026  AFTER IMAGE TEAM", _font_pixel, 10, Color8(250, 238, 210, 210))
 	_anchor_line(_footer, F_FOOTER)
 	_screen.add_child(_footer)
 
@@ -1018,6 +1044,56 @@ func _input(event: InputEvent) -> void:
 		_close_popup()
 
 # ================================================================== layout ==
+# one 32px blackstone block texture (nearest-upscaled, like the frame ring)
+func _stone_tex(path: String) -> Texture2D:
+	var img: Image = (load(path) as Texture2D).get_image()
+	if img.is_compressed():
+		img.decompress()
+	img.convert(Image.FORMAT_RGBA8)
+	img.resize(int(STONE_PX), int(STONE_PX), Image.INTERPOLATE_NEAREST)
+	return ImageTexture.create_from_image(img)
+
+
+# rebuild the homepage ground strip whenever the glass size changes
+func _update_ground() -> void:
+	if _ground_root == null:
+		return
+	var sz := _screen.size
+	if sz == _ground_size:
+		return
+	_ground_size = sz
+	for c in _ground_root.get_children():
+		(c as Node).queue_free()
+
+	var gh := maxf(sz.y * GROUND_F, STONE_PX)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261114   # fixed mixture, same every launch
+
+	var slab := Sprite2D.new()
+	slab.texture = _stone_base
+	slab.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	slab.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	slab.region_enabled = true
+	slab.region_rect = Rect2(Vector2.ZERO, Vector2(sz.x, gh))
+	slab.centered = false
+	slab.position = Vector2(0, sz.y - gh)
+	_ground_root.add_child(slab)
+
+	var cols := int(ceilf(sz.x / STONE_PX))
+	var rows := int(floorf(gh / STONE_PX))
+	for cy in rows:
+		for cx in cols:
+			var roll := rng.randf()
+			if roll >= GROUND_MIX_CRACKED + GROUND_MIX_GILDED:
+				continue
+			var acc := Sprite2D.new()
+			acc.texture = _stone_gilded if roll < GROUND_MIX_GILDED else _stone_cracked
+			acc.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			acc.centered = false
+			acc.position = Vector2(cx, cy) * STONE_PX + Vector2(0, sz.y - gh)
+			_ground_root.add_child(acc)
+
+
 func _layout() -> void:
 	# the TV art stretches to fill the whole window — no bars on any side
 	var vs := get_viewport_rect().size
@@ -1025,8 +1101,10 @@ func _layout() -> void:
 	_tv_root.position = Vector2.ZERO
 	_tv_root.pivot_offset = vs / 2.0
 
-	_screen.position = GLASS_F.position * vs
-	_screen.size = GLASS_F.size * vs
+	_screen.position = Vector2.ZERO
+	_screen.size = vs
+
+	_update_ground()
 
 	# title band: explicit geometry so the pivot is its middle
 	var gw := _screen.size.x
