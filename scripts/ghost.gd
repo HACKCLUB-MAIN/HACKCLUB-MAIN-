@@ -31,7 +31,8 @@ func _physics_process(_delta: float) -> void:
 	if frame >= positions.size():
 		frame = 0
 	position = positions[frame]
+	# The Boy-style sheet faces LEFT by default, so flip when moving right.
 	if frame < velocities.size() and "flip_h" in visual:
 		if absf(velocities[frame].x) > FLIP_EPSILON:
-			visual.flip_h = velocities[frame].x < 0.0
+			visual.flip_h = velocities[frame].x > 0.0
 	frame += 1

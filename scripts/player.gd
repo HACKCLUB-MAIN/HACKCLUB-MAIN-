@@ -61,9 +61,18 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	# --- Facing (works for Sprite2D and AnimatedSprite2D) ---
-	if dir != 0.0 and "flip_h" in visual:
-		visual.flip_h = dir < 0.0
+	# --- Facing + animation (works for Sprite2D and AnimatedSprite2D) ---
+	# NOTE: the Boy sheet faces LEFT by default, so flip when moving right.
+	if "flip_h" in visual and dir != 0.0:
+		visual.flip_h = dir > 0.0
+	if visual is AnimatedSprite2D and visual.sprite_frames != null:
+		var anim := &"idle"
+		if not is_on_floor():
+			anim = &"jump"
+		elif absf(velocity.x) > 10.0:
+			anim = &"move"
+		if visual.sprite_frames.has_animation(anim) and visual.animation != anim:
+			visual.play(anim)
 
 	# --- Record this tick so a ghost clone can replay it later ---
 	RunManager.record_sample(global_position, velocity)
