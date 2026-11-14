@@ -50,7 +50,7 @@ script = ExtResource("1_ghost")
 shape = SubResource("RectangleShape2D_body")
 
 [node name="Visual" type="AnimatedSprite2D" parent="." unique_id=1104456581]
-scale = Vector2(0.97, 0.97)
+scale = Vector2(0.6153847, 0.6153847)
 sprite_frames = SubResource("SpriteFrames_3vl2n")
 animation = &"not move + move"
 autoplay = "not move + move"
