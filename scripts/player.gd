@@ -27,6 +27,10 @@ var _prev_fall := 0.0         # fall speed last tick (for landing thumps)
 
 func _ready() -> void:
 	speed = SPEED * GameState.speed_mult()
+	# Safety net: if the spawn point is wedged inside geometry (floor below +
+	# a platform overhead, e.g. a 42px body squeezed into a 40px gap), the
+	# body gets jammed and can never move. Lift straight up until it fits.
+	_unjam()
 
 
 func _physics_process(delta: float) -> void:
@@ -118,3 +122,31 @@ func bounce(force: float) -> void:
 	velocity.y = -force
 	jump_buffer = 0.0
 	coyote_timer = 0.0
+
+
+## Spawn-safety: nudge the body up until its collision box no longer
+## overlaps any world geometry (bounded so a bad level can't loop forever).
+func _unjam() -> void:
+	await get_tree().physics_frame
+	if not is_inside_tree():
+		return
+	var col: CollisionShape2D = get_node_or_null("Collision")
+	if col == null or not (col.shape is RectangleShape2D):
+		return
+	var space := get_world_2d().direct_space_state
+	var probe := RectangleShape2D.new()
+	var sz: Vector2 = (col.shape as RectangleShape2D).size
+	probe.size = sz - Vector2(2.0, 2.0)   # margin so "flush" doesn't count
+	var params := PhysicsShapeQueryParameters2D.new()
+	params.shape = probe
+	params.exclude = [get_rid()]
+	var lifted := 0
+	for i in 48:
+		params.transform = col.global_transform
+		if space.intersect_shape(params, 1).is_empty():
+			if lifted > 0:
+				print("Player: spawn was wedged in geometry; lifted ", lifted, "px free")
+			return
+		position.y -= 1.0
+		lifted += 1
+	print("Player: spawn still blocked after lifting ", lifted, "px")

@@ -219,7 +219,13 @@ func _fit_to_screen() -> void:
 	var vs := get_viewport_rect().size
 	if vs.x <= 0.0 or vs.y <= 0.0:
 		return
-	scale = Vector2(vs.x / WORLD_W, vs.y / WORLD_H)
+	# ONE uniform scale - physics breaks if collision shapes are scaled
+	# non-uniformly (bodies get stuck), so never fit width and height
+	# separately. The whole world always fits; on monitors that aren't
+	# exactly 16:9 the leftover strip is filled by the cave backdrop.
+	var s := minf(vs.x / WORLD_W, vs.y / WORLD_H)
+	scale = Vector2(s, s)
+	position = ((vs - Vector2(WORLD_W, WORLD_H) * s) * 0.5).max(Vector2.ZERO)
 
 
 func _build_frame() -> void:

@@ -242,7 +242,10 @@ func _safe(x: float) -> bool:
 # ------------------------------------------------------------------- draw ---
 func _draw() -> void:
 	# 1) dark themed backdrop (sculk cave / deepslate mine / nether inferno)
-	draw_texture_rect(_tex["bg"], WORLD, true, _theme.bg_tint)
+	# drawn well beyond the world rect so the letterbox strip left over on
+	# monitors that aren't 16:9 reads as cave air instead of empty void
+	draw_texture_rect(_tex["bg"], Rect2(-500.0, -500.0, 2152.0, 1648.0),
+		true, _theme.bg_tint)
 
 	# 1b) murky depth so the tiling disappears into cave air
 	for m in _murks:

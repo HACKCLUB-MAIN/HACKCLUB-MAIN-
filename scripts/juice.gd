@@ -268,7 +268,7 @@ func show_tutorial() -> void:
 		"Orange pads launch you HIGH",
 		"",
 		"GOAL: reach the EXIT DOOR",
-		"Coins buy skins & upgrades in the shop",
+		"Coins score your run - grab them all!",
 		"",
 		"DIE and your GHOST replays the run!",
 		"R restarts.  %s pauses." % GameState.key_name("pause"),
