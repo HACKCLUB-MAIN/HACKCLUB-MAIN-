@@ -27,16 +27,17 @@ func _ambient() -> void:
 	var visual := get_node_or_null("Visual")
 	if visual != null:
 		var tv := visual.create_tween().set_loops()
-		tv.tween_property(visual, "position:y", -5.0, 1.1)\
+		tv.tween_property(visual, "position:y", visual.position.y - 3.0, 1.1)\
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		tv.tween_property(visual, "position:y", 0.0, 1.1)\
+		tv.tween_property(visual, "position:y", visual.position.y, 1.1)\
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	var arrow := get_node_or_null("Arrow")
 	if arrow != null:
+		var ay: float = arrow.position.y
 		var ta := arrow.create_tween().set_loops()
-		ta.tween_property(arrow, "position:y", -96.0, 0.65)\
+		ta.tween_property(arrow, "position:y", ay + 7.0, 0.65)\
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		ta.tween_property(arrow, "position:y", -110.0, 0.65)\
+		ta.tween_property(arrow, "position:y", ay - 7.0, 0.65)\
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 

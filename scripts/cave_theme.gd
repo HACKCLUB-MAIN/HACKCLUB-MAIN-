@@ -18,12 +18,43 @@ const CEILING_Y := 96.0
 
 const COL_BG_TINT := Color(0.40, 0.26, 0.55)   # sculk -> deep purple-black
 const COL_ROCK := Color(0.055, 0.04, 0.075)    # silhouette framing rock
-const COL_MURK := Color(0.03, 0.02, 0.05)      # murky depth blobs
-const COL_GLOW := Color(0.5, 0.09, 0.02)       # lava firelight
-const COL_VINE := Color(0.10, 0.20, 0.12)
-const COL_VINE_DARK := Color(0.07, 0.14, 0.09)
-const COL_CRYST := Color(0.38, 0.12, 0.44)     # dark amethyst
-const COL_CRYST_HI := Color(0.55, 0.24, 0.60)
+
+# Per-level moods. Level 1 (easy) keeps the classic purple sculk cave;
+# level 2 becomes a cold deepslate mine; level 3 a red nether inferno.
+const THEMES := {
+	"cave": {
+		"bg": "sculk",
+		"bg_tint": Color(0.40, 0.26, 0.55),
+		"murk": Color(0.03, 0.02, 0.05),
+		"glow": Color(0.5, 0.09, 0.02),
+		"vine": Color(0.10, 0.20, 0.12),
+		"vine_dark": Color(0.07, 0.14, 0.09),
+		"cryst": Color(0.38, 0.12, 0.44),
+		"cryst_hi": Color(0.55, 0.24, 0.60),
+	},
+	"frost": {
+		"bg": "deepslate",
+		"bg_tint": Color(0.24, 0.33, 0.50),
+		"murk": Color(0.015, 0.03, 0.06),
+		"glow": Color(0.10, 0.28, 0.45),
+		"vine": Color(0.10, 0.24, 0.30),
+		"vine_dark": Color(0.07, 0.17, 0.22),
+		"cryst": Color(0.30, 0.55, 0.75),
+		"cryst_hi": Color(0.60, 0.82, 0.98),
+	},
+	"inferno": {
+		"bg": "netherrack",
+		"bg_tint": Color(0.42, 0.14, 0.14),
+		"murk": Color(0.06, 0.012, 0.012),
+		"glow": Color(0.62, 0.10, 0.02),
+		"vine": Color(0.34, 0.07, 0.05),
+		"vine_dark": Color(0.24, 0.05, 0.04),
+		"cryst": Color(0.80, 0.24, 0.08),
+		"cryst_hi": Color(1.0, 0.48, 0.15),
+	},
+}
+
+var _theme: Dictionary = THEMES.cave
 
 const TINT := {
 	grass = Color(0.42, 0.48, 0.38),   # mossy tops, kept dim
@@ -52,9 +83,17 @@ func _ready() -> void:
 func build(level: Node2D) -> void:
 	_rng.seed = hash(level.scene_file_path)
 
-	for file in ["sculk", "grass_block_side", "rooted_dirt",
+	# pick the mood for this level (level 1 keeps the classic cave)
+	var path: String = level.scene_file_path
+	if "level_2" in path:
+		_theme = THEMES.frost
+	elif "level_3" in path:
+		_theme = THEMES.inferno
+
+	for file in ["grass_block_side", "rooted_dirt",
 			"cobbled_deepslate", "mud"]:
 		_tex[file] = load(TEX_DIR + file + ".png")
+	_tex["bg"] = load(TEX_DIR + String(_theme.bg) + ".png")
 
 	for child in level.get_children():
 		var cname := String(child.name)
@@ -165,7 +204,7 @@ func _mk_vine(x: float, y: float, len: float) -> Dictionary:
 		"x": x, "y": y, "len": len,
 		"ph": _rng.randf_range(0.0, TAU),
 		"sp": _rng.randf_range(0.6, 1.4),
-		"col": COL_VINE if _rng.randf() < 0.7 else COL_VINE_DARK,
+		"col": _theme.vine if _rng.randf() < 0.7 else _theme.vine_dark,
 		"n": 5 + int(_rng.randf() * 3.0),
 	}
 
@@ -202,18 +241,18 @@ func _safe(x: float) -> bool:
 
 # ------------------------------------------------------------------- draw ---
 func _draw() -> void:
-	# 1) dark sculk backdrop
-	draw_texture_rect(_tex.sculk, WORLD, true, COL_BG_TINT)
+	# 1) dark themed backdrop (sculk cave / deepslate mine / nether inferno)
+	draw_texture_rect(_tex["bg"], WORLD, true, _theme.bg_tint)
 
 	# 1b) murky depth so the tiling disappears into cave air
 	for m in _murks:
-		draw_circle(m.pos, m.r, Color(COL_MURK, m.a))
+		draw_circle(m.pos, m.r, Color(_theme.murk, m.a))
 
 	# 2) warm firelight behind the lava pools
 	for g in _lavas:
 		var c: Vector2 = g + Vector2(0, 10)
 		for i in 5:
-			draw_circle(c, 50.0 + 34.0 * i, Color(COL_GLOW, 0.16 - 0.028 * i))
+			draw_circle(c, 50.0 + 34.0 * i, Color(_theme.glow, 0.16 - 0.028 * i))
 
 	# 3) textured platforms
 	for p in _plats:
@@ -294,5 +333,5 @@ func _draw_cryst(c: Dictionary) -> void:
 		var tip := Vector2(bx + s.lean, c.y - s.h)
 		draw_colored_polygon(PackedVector2Array([
 			Vector2(bx - s.w, c.y), tip, Vector2(bx + s.w, c.y)]),
-			COL_CRYST * pulse)
-		draw_line(Vector2(bx - s.w, c.y), tip, COL_CRYST_HI * pulse, 1.2)
+			_theme.cryst * pulse)
+		draw_line(Vector2(bx - s.w, c.y), tip, _theme.cryst_hi * pulse, 1.2)

@@ -10,12 +10,30 @@ const GHOST_SCENE := preload("res://scenes/ghost.tscn")
 # baseline window - so one uniform scale maps the world onto the full screen.
 const WORLD_W := 1152.0
 const WORLD_H := 648.0
-const TEX_BLOCK := "res://ITCH ASSETS/Minecraft Textures/block/polished_blackstone_bricks.png"
-const TEX_BLOCK_CRACKED := "res://ITCH ASSETS/Minecraft Textures/block/cracked_polished_blackstone_bricks.png"
-const TEX_BLOCK_GILDED := "res://ITCH ASSETS/Minecraft Textures/block/gilded_blackstone.png"
+const TEX_DIR_BLOCK := "res://ITCH ASSETS/Minecraft Textures/block/"
 const BLOCK_PX := 32.0      # block tile size on screen (16px art upscaled 2x)
 const SHADER_CRT := "res://shaders/crt.gdshader"
 const CAVE_THEME := preload("res://scripts/cave_theme.gd")
+
+# Per-level ground block mixtures. Level 1 (easy) keeps the blackstone look;
+# level 2 becomes a deepslate mine, level 3 a nether inferno.
+const GROUND_SKINS := {
+	"level_1": {
+		"base": "polished_blackstone_bricks",
+		"alt": "cracked_polished_blackstone_bricks",
+		"rare": "gilded_blackstone",
+	},
+	"level_2": {
+		"base": "deepslate_bricks",
+		"alt": "deepslate_tiles",
+		"rare": "deepslate_gold_ore",
+	},
+	"level_3": {
+		"base": "nether_bricks",
+		"alt": "red_nether_bricks",
+		"rare": "nether_gold_ore",
+	},
+}
 
 # --- juice / animation state ---
 var _t := 0.0
@@ -123,10 +141,20 @@ func _block_tex_32(path: String) -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 
+func _ground_skin() -> Dictionary:
+	var skin: Dictionary = GROUND_SKINS["level_1"]
+	for key in GROUND_SKINS:
+		if key in scene_file_path:
+			skin = GROUND_SKINS[key]
+			break
+	return skin
+
+
 func _blackstone_ground() -> void:
-	var base := _block_tex_32(TEX_BLOCK)
-	var cracked := _block_tex_32(TEX_BLOCK_CRACKED)
-	var gilded := _block_tex_32(TEX_BLOCK_GILDED)
+	var skin := _ground_skin()
+	var base := _block_tex_32(TEX_DIR_BLOCK + skin.base + ".png")
+	var cracked := _block_tex_32(TEX_DIR_BLOCK + skin.alt + ".png")
+	var gilded := _block_tex_32(TEX_DIR_BLOCK + skin.rare + ".png")
 	var rng := RandomNumberGenerator.new()
 	for poly in _ground_polys(self):
 		var rect := _poly_rect(poly)
@@ -220,9 +248,10 @@ func _block_curtain() -> void:
 	wall.name = "BlockCurtain"
 	layer.add_child(wall)
 
-	var base := _block_tex_32(TEX_BLOCK)
-	var cracked := _block_tex_32(TEX_BLOCK_CRACKED)
-	var gilded := _block_tex_32(TEX_BLOCK_GILDED)
+	var skin := _ground_skin()
+	var base := _block_tex_32(TEX_DIR_BLOCK + skin.base + ".png")
+	var cracked := _block_tex_32(TEX_DIR_BLOCK + skin.alt + ".png")
+	var gilded := _block_tex_32(TEX_DIR_BLOCK + skin.rare + ".png")
 	var cols := int(ceilf(vs.x / BLOCK_PX))
 	var rows := int(ceilf(vs.y / BLOCK_PX))
 	var rng := RandomNumberGenerator.new()

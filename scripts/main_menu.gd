@@ -594,26 +594,11 @@ func _on_action(action: String, _b: Button) -> void:
 		return
 	match action:
 		"start":
-			_busy = true
 			_play("confirm", 1.0, -4)
-			# launch beat: zoom pulse, UI/clouds fade out, the block wall
-			# flashes bright - then the level opens with the SAME wall
-			# covering it (same seed/tint), and its blocks fall away from
-			# the top to reveal the game (see level.gd _block_curtain)
-			_launch_pulse()
-			var out := create_tween()
-			out.set_parallel(true)
-			out.tween_property(_ground_root, "self_modulate",
-				Color(1.0, 1.0, 1.05), 0.16)
-			out.tween_property(_cloud_root, "modulate:a", 0.0, 0.25)
-			out.tween_property(_title_node, "modulate:a", 0.0, 0.3)
-			out.tween_property(_sub_label, "modulate:a", 0.0, 0.3)
-			out.tween_property(_buttons_box, "modulate:a", 0.0, 0.25)
-			out.tween_property(_year_label, "modulate:a", 0.0, 0.3)
-			out.tween_property(_icon_row, "modulate:a", 0.0, 0.25)
-			out.tween_property(_footer, "modulate:a", 0.0, 0.3)
-			await get_tree().create_timer(0.4).timeout
-			GameState.start_level(1)
+			# PLAY first asks WHICH level to run: three difficulty boxes,
+			# each styled differently (green stroll / amber mine / red inferno)
+			_popup_open("SELECT YOUR LEVEL", "", _b,
+				[{"widget": "_fill_level_select"}])
 		"shop":
 			_popup_open("SHOP", "", _b, [{"widget": "_fill_shop"}])
 		"settings":
@@ -637,6 +622,131 @@ func _launch_pulse() -> void:
 	var tw := create_tween()
 	tw.tween_method(func(v: float) -> void: _pulse = v, 0.06, 0.0, 0.45)\
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+
+## The three difficulty boxes shown when the player presses PLAY.
+## Each box is tinted and labeled differently so the difficulty reads at a
+## glance: green stroll / amber deepslate mine / red nether inferno. Locked
+## boxes shake and stay greyed until the previous level is cleared.
+func _fill_level_select() -> void:
+	var defs := [
+		{
+			"n": 1, "title": "EASY",
+			"sub": "LEVEL 1  -  CALM CAVE",
+			"tint": Color(0.80, 1.14, 0.82),
+			"col": Color8(30, 92, 46),
+			"pip": Color8(56, 158, 74),
+		},
+		{
+			"n": 2, "title": "MEDIUM",
+			"sub": "LEVEL 2  -  DEEPSLATE MINE",
+			"tint": Color(1.12, 0.92, 0.52),
+			"col": Color8(146, 92, 14),
+			"pip": Color8(232, 152, 42),
+		},
+		{
+			"n": 3, "title": "HARD",
+			"sub": "LEVEL 3  -  NETHER INFERNO",
+			"tint": Color(1.16, 0.62, 0.55),
+			"col": Color8(140, 28, 22),
+			"pip": Color8(204, 48, 34),
+		},
+	]
+	for d in defs:
+		var n: int = d.n
+		var locked := not GameState.is_level_unlocked(n)
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(0, 62)
+		var sb_n := _mk_stylebox(load(UI_PANEL), 10)
+		sb_n.modulate_color = d.tint
+		var sb_p := _mk_stylebox(load(UI_PANEL_PRESSED), 10)
+		sb_p.modulate_color = (d.tint as Color).darkened(0.12)
+		b.add_theme_stylebox_override("normal", sb_n)
+		b.add_theme_stylebox_override("hover", sb_n)
+		b.add_theme_stylebox_override("pressed", sb_p)
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		b.focus_mode = Control.FOCUS_ALL
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		b.mouse_entered.connect(func() -> void:
+			b.grab_focus()
+			_tween_scale(b, 1.05, Color(1.06, 1.06, 1.02)))
+		b.mouse_exited.connect(func() -> void:
+			if not b.has_focus():
+				_tween_scale(b, 1.0, Color.WHITE))
+		b.focus_entered.connect(func() -> void:
+			_tween_scale(b, 1.05, Color(1.06, 1.06, 1.02)))
+		b.focus_exited.connect(func() -> void:
+			_tween_scale(b, 1.0, Color.WHITE))
+
+		# two-line label + difficulty pips drawn INSIDE the box
+		var inner := VBoxContainer.new()
+		inner.set_anchors_preset(Control.PRESET_FULL_RECT)
+		inner.offset_left = 18.0
+		inner.offset_right = -18.0
+		inner.offset_top = 7.0
+		inner.offset_bottom = -7.0
+		inner.alignment = BoxContainer.ALIGNMENT_CENTER
+		inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(inner)
+
+		var title := _mk_label(d.title, _font_pixel, 15, d.col)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		inner.add_child(title)
+
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 6)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		inner.add_child(row)
+
+		var sub_text: String = d.sub if not locked \
+			else "LOCKED  -  CLEAR THE LEVEL BEFORE"
+		var sub := _mk_label(sub_text, _font_pixel, 7,
+			d.col if not locked else Color8(96, 88, 80))
+		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		row.add_child(sub)
+
+		# filled squares = how deadly the level is (1..3)
+		for i in 3:
+			var pip := ColorRect.new()
+			pip.custom_minimum_size = Vector2(9, 9)
+			pip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			pip.color = (d.pip as Color) if i < n else Color(0.25, 0.2, 0.16, 0.35)
+			row.add_child(pip)
+
+		if locked:
+			b.self_modulate = Color(0.6, 0.6, 0.64)
+			b.pressed.connect(func() -> void:
+				_play("back", 0.7, -8)
+				var tw := create_tween()
+				var x0 := b.position.x
+				tw.tween_property(b, "position:x", x0 + 6.0, 0.05)
+				tw.tween_property(b, "position:x", x0 - 6.0, 0.05)
+				tw.tween_property(b, "position:x", x0, 0.05))
+		else:
+			b.button_down.connect(func() -> void: _play("click", 1.0, -6))
+			b.pressed.connect(func() -> void:
+				_close_popup()
+				_busy = true
+				_play("confirm", 1.0, -4)
+				# launch beat: the block wall flashes bright, then the level
+				# opens covered by the SAME wall (see level.gd _block_curtain)
+				_launch_pulse()
+				var out := create_tween()
+				out.set_parallel(true)
+				out.tween_property(_ground_root, "self_modulate",
+					Color(1.0, 1.0, 1.05), 0.16)
+				out.tween_property(_cloud_root, "modulate:a", 0.0, 0.25)
+				out.tween_property(_title_node, "modulate:a", 0.0, 0.3)
+				out.tween_property(_sub_label, "modulate:a", 0.0, 0.3)
+				out.tween_property(_buttons_box, "modulate:a", 0.0, 0.25)
+				out.tween_property(_year_label, "modulate:a", 0.0, 0.3)
+				out.tween_property(_icon_row, "modulate:a", 0.0, 0.25)
+				out.tween_property(_footer, "modulate:a", 0.0, 0.3)
+				await get_tree().create_timer(0.4).timeout
+				GameState.start_level(n))
+		_popup_actions.add_child(b)
 
 func _quit_game() -> void:
 	_busy = true
