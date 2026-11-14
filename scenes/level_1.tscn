@@ -30,6 +30,9 @@ size = Vector2(88, 160)
 [sub_resource type="RectangleShape2D" id="lava2_kill"]
 size = Vector2(96, 80)
 
+[sub_resource type="RectangleShape2D" id="hop_platform"]
+size = Vector2(128, 16)
+
 [node name="Level1" type="Node2D" unique_id=2012662618]
 script = ExtResource("1_level")
 
@@ -62,6 +65,10 @@ shape = SubResource("hill_c")
 [node name="HillD" type="CollisionShape2D" parent="World" unique_id=1596565879]
 position = Vector2(60, 568)
 shape = SubResource("hill_d")
+
+[node name="Hop" type="CollisionShape2D" parent="World" unique_id=1720391736]
+position = Vector2(576, 448)
+shape = SubResource("hop_platform")
 
 [node name="GroundAVis" type="Polygon2D" parent="." unique_id=1186995662]
 color = Color(0.42, 0.3, 0.22, 1)

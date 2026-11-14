@@ -25,6 +25,7 @@ var _ghost_root: Node2D = null
 var _door: Area2D = null
 var _was_on_floor := true
 var _embers: Array = []
+var _squash_tween: Tween = null
 
 
 func _ready() -> void:
@@ -234,13 +235,22 @@ func _door_pulse() -> void:
 
 
 # squash/stretch the player's Visual child only (x-scale, y-scale -> normal)
+# NOTE: tweens back to the Visual's OWN base scale (remembered on first use),
+# never a hardcoded 1x — otherwise any character whose base scale isn't 1
+# (e.g. a downscaled sprite) would grow a little with every jump/landing
+# and end up visually bigger than its collision box.
 func _squash(sx: float, sy: float) -> void:
 	var vis: Node2D = _player.get_node_or_null("Visual")
 	if vis == null:
 		return
-	vis.scale = Vector2(sx, sy)
-	var tw := create_tween()
-	tw.tween_property(vis, "scale", Vector2.ONE, 0.22)\
+	if not vis.has_meta("base_scale"):
+		vis.set_meta("base_scale", vis.scale)
+	var base: Vector2 = vis.get_meta("base_scale")
+	if _squash_tween != null and _squash_tween.is_valid():
+		_squash_tween.kill()   # a stale squash must not fight this one
+	_squash_tween = create_tween()
+	vis.scale = base * Vector2(sx, sy)
+	_squash_tween.tween_property(vis, "scale", base, 0.22)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
