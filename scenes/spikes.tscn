@@ -1,19 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dxcwpfr00jomq"]
 
-[ext_resource type="Script" path="res://scripts/killzone.gd" id="1_kill"]
+[ext_resource type="Script" uid="uid://b5spj43wra6ee" path="res://scripts/killzone.gd" id="1_kill"]
 [ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="2_lava"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_spikes"]
-size = Vector2(72, 10)
+size = Vector2(64, 10)
 
-[node name="Spikes" type="Area2D"]
+[node name="Spikes" type="Area2D" unique_id=359587279]
 script = ExtResource("1_kill")
 
-[node name="Collision" type="CollisionShape2D" parent="."]
-position = Vector2(0, -3)
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=224605362]
+position = Vector2(-4, -3)
 shape = SubResource("RectangleShape2D_spikes")
 
-[node name="Lava" parent="." instance=ExtResource("2_lava")]
+[node name="Lava" parent="." unique_id=1812303431 instance=ExtResource("2_lava")]
 position = Vector2(0, -3)
 width = 78.0
 depth = 9.0

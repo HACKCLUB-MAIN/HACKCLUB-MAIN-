@@ -1,8 +1,8 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene format=3 uid="uid://bgli8biy2miib"]
 
-[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://scenes/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="Script" uid="uid://5g04xdcxflkn" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://cqurcqpb5m6di" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://bag1u11abys2d" path="res://scenes/pressure_plate.tscn" id="3_plate"]
 [ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_spikes"]
 [ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
 [ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
@@ -32,12 +32,6 @@ size = Vector2(208, 16)
 [sub_resource type="RectangleShape2D" id="border_wall"]
 size = Vector2(16, 128)
 
-[sub_resource type="RectangleShape2D" id="spike_kill"]
-size = Vector2(80, 120)
-
-[sub_resource type="RectangleShape2D" id="safety_kill"]
-size = Vector2(1400, 80)
-
 [sub_resource type="RectangleShape2D" id="hill_a"]
 size = Vector2(96, 176)
 
@@ -53,217 +47,204 @@ size = Vector2(88, 160)
 [sub_resource type="RectangleShape2D" id="upper2"]
 size = Vector2(120, 16)
 
-[sub_resource type="RectangleShape2D" id="lava2_kill"]
-size = Vector2(96, 120)
-
-[node name="Level2" type="Node2D"]
+[node name="Level2" type="Node2D" unique_id=810975422]
 script = ExtResource("1_level")
 
-[node name="World" type="StaticBody2D" parent="."]
+[node name="World" type="StaticBody2D" parent="." unique_id=1505848325]
 
-[node name="GroundA" type="CollisionShape2D" parent="World"]
+[node name="GroundA" type="CollisionShape2D" parent="World" unique_id=229390298]
 position = Vector2(320, 584)
 shape = SubResource("ground_a")
 
-[node name="GroundB" type="CollisionShape2D" parent="World"]
+[node name="GroundB" type="CollisionShape2D" parent="World" unique_id=109827201]
 position = Vector2(944, 584)
 shape = SubResource("ground_b")
 
-[node name="PitFloor" type="CollisionShape2D" parent="World"]
+[node name="PitFloor" type="CollisionShape2D" parent="World" unique_id=1634217626]
 position = Vector2(688, 640)
 shape = SubResource("pit_floor")
 
-[node name="Step1" type="CollisionShape2D" parent="World"]
-position = Vector2(208, 472)
+[node name="Step1" type="CollisionShape2D" parent="World" unique_id=1798660927]
+position = Vector2(212, 457)
 shape = SubResource("step1")
 
-[node name="Step2" type="CollisionShape2D" parent="World"]
+[node name="Step2" type="CollisionShape2D" parent="World" unique_id=240859066]
 position = Vector2(304, 408)
 shape = SubResource("step2")
 
-[node name="HighPlatform" type="CollisionShape2D" parent="World"]
+[node name="HighPlatform" type="CollisionShape2D" parent="World" unique_id=1141410639]
 position = Vector2(456, 344)
 shape = SubResource("high_platform")
 
-[node name="WallL" type="CollisionShape2D" parent="World"]
+[node name="WallL" type="CollisionShape2D" parent="World" unique_id=867404225]
 position = Vector2(8, 456)
 shape = SubResource("border_wall")
 
-[node name="WallR" type="CollisionShape2D" parent="World"]
+[node name="WallR" type="CollisionShape2D" parent="World" unique_id=703616251]
 position = Vector2(1144, 456)
 shape = SubResource("border_wall")
 
-[node name="HillA" type="CollisionShape2D" parent="World"]
+[node name="HillA" type="CollisionShape2D" parent="World" unique_id=550801392]
 position = Vector2(592, 560)
 shape = SubResource("hill_a")
 
-[node name="HillB" type="CollisionShape2D" parent="World"]
+[node name="HillB" type="CollisionShape2D" parent="World" unique_id=833229187]
 position = Vector2(766, 560)
 shape = SubResource("hill_b")
 
-[node name="HillC" type="CollisionShape2D" parent="World"]
+[node name="HillC" type="CollisionShape2D" parent="World" unique_id=649500724]
 position = Vector2(960, 560)
 shape = SubResource("hill_c")
 
-[node name="HillD" type="CollisionShape2D" parent="World"]
+[node name="HillD" type="CollisionShape2D" parent="World" unique_id=1573947586]
 position = Vector2(44, 568)
 shape = SubResource("hill_d")
 
-[node name="Upper1" type="CollisionShape2D" parent="World"]
+[node name="Upper1" type="CollisionShape2D" parent="World" unique_id=922190235]
 position = Vector2(700, 308)
 shape = SubResource("upper2")
 
-[node name="Upper2" type="CollisionShape2D" parent="World"]
+[node name="Upper2" type="CollisionShape2D" parent="World" unique_id=1100228038]
 position = Vector2(920, 248)
 shape = SubResource("upper2")
 
-[node name="GroundAVis" type="Polygon2D" parent="."]
+[node name="GroundAVis" type="Polygon2D" parent="." unique_id=1394795201]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 520, 640, 520, 640, 648, 0, 648)
 
-[node name="GroundBVis" type="Polygon2D" parent="."]
+[node name="GroundBVis" type="Polygon2D" parent="." unique_id=600309942]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(736, 520, 1152, 520, 1152, 648, 736, 648)
 
-[node name="PitFloorVis" type="Polygon2D" parent="."]
+[node name="PitFloorVis" type="Polygon2D" parent="." unique_id=585477085]
 color = Color(0.32, 0.22, 0.16, 1)
 polygon = PackedVector2Array(640, 632, 736, 632, 736, 648, 640, 648)
 
-[node name="Step1Vis" type="Polygon2D" parent="."]
+[node name="Step1Vis" type="Polygon2D" parent="." unique_id=1981225246]
+position = Vector2(4, -15)
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(160, 464, 256, 464, 256, 480, 160, 480)
+polygon = PackedVector2Array(160, 464, 256, 464, 256, 480, 230, 481, 160, 480)
 
-[node name="Step2Vis" type="Polygon2D" parent="."]
+[node name="Step2Vis" type="Polygon2D" parent="." unique_id=1460687777]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(256, 400, 352, 400, 352, 416, 256, 416)
 
-[node name="HighVis" type="Polygon2D" parent="."]
+[node name="HighVis" type="Polygon2D" parent="." unique_id=1540533154]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(352, 336, 560, 336, 560, 352, 352, 352)
 
-[node name="WallLVis" type="Polygon2D" parent="."]
+[node name="WallLVis" type="Polygon2D" parent="." unique_id=914791950]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 
-[node name="WallRVis" type="Polygon2D" parent="."]
+[node name="WallRVis" type="Polygon2D" parent="." unique_id=1936903705]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
 
-[node name="Upper1Vis" type="Polygon2D" parent="."]
+[node name="Upper1Vis" type="Polygon2D" parent="." unique_id=140038638]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(640, 300, 760, 300, 760, 316, 640, 316)
 
-[node name="Upper2Vis" type="Polygon2D" parent="."]
+[node name="Upper2Vis" type="Polygon2D" parent="." unique_id=393252333]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(860, 240, 980, 240, 980, 256, 860, 256)
 
-[node name="HillAVis" type="Polygon2D" parent="."]
+[node name="HillAVis" type="Polygon2D" parent="." unique_id=1740818347]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(544, 472, 640, 472, 640, 648, 544, 648)
 
-[node name="HillATopVis" type="Polygon2D" parent="."]
+[node name="HillATopVis" type="Polygon2D" parent="." unique_id=1433431621]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(544, 472, 640, 472, 640, 488, 544, 488)
 
-[node name="HillBVis" type="Polygon2D" parent="."]
+[node name="HillBVis" type="Polygon2D" parent="." unique_id=1853741169]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(736, 472, 796, 472, 796, 648, 736, 648)
 
-[node name="HillBTopVis" type="Polygon2D" parent="."]
+[node name="HillBTopVis" type="Polygon2D" parent="." unique_id=1319564885]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(736, 472, 796, 472, 796, 488, 736, 488)
 
-[node name="HillCVis" type="Polygon2D" parent="."]
+[node name="HillCVis" type="Polygon2D" parent="." unique_id=1582633886]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(920, 472, 1000, 472, 1000, 648, 920, 648)
 
-[node name="HillCTopVis" type="Polygon2D" parent="."]
+[node name="HillCTopVis" type="Polygon2D" parent="." unique_id=543950432]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(920, 472, 1000, 472, 1000, 488, 920, 488)
 
-[node name="HillDVis" type="Polygon2D" parent="."]
+[node name="HillDVis" type="Polygon2D" parent="." unique_id=136124997]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 488, 88, 488, 88, 648, 0, 648)
 
-[node name="HillDTopVis" type="Polygon2D" parent="."]
+[node name="HillDTopVis" type="Polygon2D" parent="." unique_id=1609118540]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(0, 488, 88, 488, 88, 504, 0, 504)
 
-[node name="LavaPool" parent="." instance=ExtResource("9_lava")]
+[node name="LavaPool" parent="." unique_id=1009335853 instance=ExtResource("9_lava")]
 position = Vector2(840, 518)
 width = 84.0
 depth = 30.0
-bubble_count = 4
 
-[node name="SpikeKill" parent="." instance=ExtResource("7_kill")]
-position = Vector2(840, 576)
+[node name="SpikeKill" parent="." unique_id=121104854 instance=ExtResource("7_kill")]
 modulate = Color(1, 1, 1, 0)
+position = Vector2(840, 560)
 
-[node name="Collision" parent="SpikeKill" index="0"]
-shape = SubResource("spike_kill")
-
-[node name="Safety" parent="." instance=ExtResource("7_kill")]
+[node name="Safety" parent="." unique_id=873854170 instance=ExtResource("7_kill")]
+modulate = Color(1, 1, 1, 0)
 position = Vector2(576, 700)
-modulate = Color(1, 1, 1, 0)
 
-[node name="Collision" parent="Safety" index="0"]
-shape = SubResource("safety_kill")
-
-[node name="PitBouncePad" parent="." instance=ExtResource("8_bounce")]
+[node name="PitBouncePad" parent="." unique_id=772462444 instance=ExtResource("8_bounce")]
 position = Vector2(688, 628)
 
-[node name="Plate1" parent="." instance=ExtResource("3_plate")]
+[node name="Plate1" parent="." unique_id=2146489991 instance=ExtResource("3_plate")]
 position = Vector2(424, 330)
 targets = Array[NodePath]([NodePath("../Gate1")])
 
-[node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
+[node name="Spikes1" parent="." unique_id=540907512 instance=ExtResource("4_spikes")]
 position = Vector2(520, 336)
 
-[node name="Gate1" parent="." instance=ExtResource("5_gate")]
+[node name="Gate1" parent="." unique_id=2142379831 instance=ExtResource("5_gate")]
 position = Vector2(900, 408)
 
-[node name="LavaPool2" parent="." instance=ExtResource("9_lava")]
+[node name="LavaPool2" parent="." unique_id=1198527526 instance=ExtResource("9_lava")]
 position = Vector2(300, 518)
 width = 84.0
 depth = 30.0
-bubble_count = 4
 
-[node name="LavaKill2" parent="." instance=ExtResource("7_kill")]
-position = Vector2(300, 576)
+[node name="LavaKill2" parent="." unique_id=912813644 instance=ExtResource("7_kill")]
 modulate = Color(1, 1, 1, 0)
+position = Vector2(300, 560)
 
-[node name="Collision" parent="LavaKill2" index="0"]
-shape = SubResource("lava2_kill")
-
-[node name="Spikes2" parent="." instance=ExtResource("4_spikes")]
+[node name="Spikes2" parent="." unique_id=1925736387 instance=ExtResource("4_spikes")]
 position = Vector2(1050, 520)
 
-[node name="CoinHigh1" parent="." instance=ExtResource("10_coin")]
+[node name="CoinHigh1" parent="." unique_id=1725202543 instance=ExtResource("10_coin")]
 position = Vector2(700, 258)
 
-[node name="CoinHigh2" parent="." instance=ExtResource("10_coin")]
+[node name="CoinHigh2" parent="." unique_id=870229711 instance=ExtResource("10_coin")]
 position = Vector2(920, 198)
 
-[node name="ExitDoor" parent="." instance=ExtResource("6_door")]
+[node name="ExitDoor" parent="." unique_id=1537344671 instance=ExtResource("6_door")]
 position = Vector2(1112, 392)
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" parent="." unique_id=505593170 instance=ExtResource("2_player")]
 position = Vector2(160, 506)
 
-[node name="CoinStart" parent="." instance=ExtResource("10_coin")]
+[node name="CoinStart" parent="." unique_id=1012758518 instance=ExtResource("10_coin")]
 position = Vector2(280, 468)
 
-[node name="CoinStep1" parent="." instance=ExtResource("10_coin")]
+[node name="CoinStep1" parent="." unique_id=1691573001 instance=ExtResource("10_coin")]
 position = Vector2(208, 424)
 
-[node name="CoinHigh" parent="." instance=ExtResource("10_coin")]
+[node name="CoinHigh" parent="." unique_id=758228272 instance=ExtResource("10_coin")]
 position = Vector2(456, 292)
 
-[node name="CoinPad" parent="." instance=ExtResource("10_coin")]
+[node name="CoinPad" parent="." unique_id=1937178684 instance=ExtResource("10_coin")]
 position = Vector2(688, 556)
 
-[node name="CoinGate" parent="." instance=ExtResource("10_coin")]
+[node name="CoinGate" parent="." unique_id=174490882 instance=ExtResource("10_coin")]
 position = Vector2(900, 254)
 
-[node name="CoinMid" parent="." instance=ExtResource("10_coin")]
+[node name="CoinMid" parent="." unique_id=1447389539 instance=ExtResource("10_coin")]
 position = Vector2(1010, 468)

@@ -85,7 +85,10 @@ func _ready() -> void:
 			var rec_positions: PackedVector2Array = ghost_data.get(
 				"positions", PackedVector2Array())
 			if not rec_positions.is_empty():
-				rec_positions[0] = player.position
+				# The recording is in GLOBAL space (the player records its
+				# global_position), so the forced first frame must be global
+				# too — otherwise the ghost spawns offset from the spawn.
+				rec_positions[0] = player.global_position
 				ghost_data["positions"] = rec_positions
 		var ghost := GHOST_SCENE.instantiate()
 		ghosts_node.add_child(ghost)

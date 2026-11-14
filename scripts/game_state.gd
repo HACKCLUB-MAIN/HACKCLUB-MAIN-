@@ -3,7 +3,7 @@ extends Node
 ## Owns: audio buses, input actions, all settings, level progress + save file.
 
 const SAVE_PATH := "user://duskvale.cfg"
-const LEVELS_COUNT := 3
+const LEVELS_COUNT := 4
 
 const DEFAULT_KEYS := {
 	"move_left": KEY_LEFT,
