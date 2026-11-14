@@ -5,19 +5,16 @@ extends Node2D
 
 const GHOST_SCENE := preload("res://scenes/ghost.tscn")
 
-# frame around the game screen, two layers:
-#   outermost = the homepage TV's shell (same art, same stretch as the menu,
-#   so pressing START keeps the TV visually in place - no black flash)
-#   inside it = a ring of Minecraft blackstone bricks (from the added assets)
-const IMG_TV := "res://assets/images/tv_screen.png"
-const GLASS_F := Rect2(62.0 / 1199.0, 40.0 / 938.0, 1083.0 / 1199.0, 845.0 / 938.0)
+# The game fills the whole window edge-to-edge: no TV bezel, no border ring.
+# Levels are authored at 1152x648, which is exactly 10/9 of the 1280x720
+# baseline window - so one uniform scale maps the world onto the full screen.
+const WORLD_W := 1152.0
+const WORLD_H := 648.0
 const TEX_BLOCK := "res://ITCH ASSETS/Minecraft Textures/block/polished_blackstone_bricks.png"
 const TEX_BLOCK_CRACKED := "res://ITCH ASSETS/Minecraft Textures/block/cracked_polished_blackstone_bricks.png"
 const TEX_BLOCK_GILDED := "res://ITCH ASSETS/Minecraft Textures/block/gilded_blackstone.png"
-const RING_T := 64.0        # blackstone ring thickness, logical px
 const BLOCK_PX := 32.0      # block tile size on screen (16px art upscaled 2x)
 const SHADER_CRT := "res://shaders/crt.gdshader"
-const RING_TINT := Color(0.42, 0.42, 0.48)   # extra-dark blackstone blocks
 const CAVE_THEME := preload("res://scripts/cave_theme.gd")
 
 # --- juice / animation state ---
@@ -32,6 +29,11 @@ var _squash_tween: Tween = null
 
 func _ready() -> void:
 	RunManager.start_recording()
+
+	# fill the whole window edge-to-edge: scale the authored world to the
+	# live viewport (no border frame left on any side)
+	_fit_to_screen()
+	get_viewport().size_changed.connect(_fit_to_screen)
 
 	# scary-cave decor (textures, vines, crystals) behind everything
 	var cave := CAVE_THEME.new()
@@ -152,44 +154,26 @@ func _poly_rect(poly: Polygon2D) -> Rect2:
 	return Rect2(lo, hi - lo)
 
 
-# ==================================================== TV + blackstone frame ==
+# ======================================================= full-screen view ====
+# Scale the authored 1152x648 world onto the live viewport so gameplay
+# reaches every edge of the window - no bars, no frame, on any window size.
+func _fit_to_screen() -> void:
+	var vs := get_viewport_rect().size
+	if vs.x <= 0.0 or vs.y <= 0.0:
+		return
+	scale = Vector2(vs.x / WORLD_W, vs.y / WORLD_H)
+
+
 func _build_frame() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 20
 	add_child(layer)
 
-	_add_tv_bezel(layer)       # outermost: the homepage TV shell
 	_add_crt_lines(layer)      # old-TV scanlines over the gameplay picture
-	_add_block_ring(layer)     # inside the shell: blackstone bricks
 
 
-# the homepage TV's shell, stretched over the whole screen exactly like the
-# menu does. The cream glass picture is punched out transparent so the
-# blackstone ring + the game show through.
-func _add_tv_bezel(layer: CanvasLayer) -> void:
-	var tv_tex: Texture2D = load(IMG_TV)
-	var img: Image = tv_tex.get_image()
-	if img.is_compressed():
-		img.decompress()
-	img.convert(Image.FORMAT_RGBA8)
-	var asz := Vector2(img.get_width(), img.get_height())
-	var glass := Rect2(GLASS_F.position * asz, GLASS_F.size * asz)
-	# grow 2px past the glass boundary so no cream picture / glass-edge
-	# highlight remains - only the dark navy TV shell stays visible
-	img.fill_rect(Rect2i(glass.grow(2.0)), Color(0, 0, 0, 0))
-
-	var bezel := TextureRect.new()
-	bezel.texture = ImageTexture.create_from_image(img)
-	bezel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bezel.stretch_mode = TextureRect.STRETCH_SCALE
-	bezel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bezel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(bezel)
-
-
-# old-TV scanlines drawn only over the glass picture area: sits between the
-# TV shell and the blackstone ring so the ring stays crisp. Tuned light so
-# gameplay stays readable (no heavy vignette/noise like the menu's boot FX).
+# old-TV scanlines drawn over the whole gameplay picture (full screen).
+# Tuned light so gameplay stays readable.
 func _add_crt_lines(layer: CanvasLayer) -> void:
 	var rect := ColorRect.new()
 	rect.material = ShaderMaterial.new()
@@ -205,60 +189,8 @@ func _add_crt_lines(layer: CanvasLayer) -> void:
 	mat.set_shader_parameter("band_h", 0.0)
 	mat.set_shader_parameter("brightness", 1.0)
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.anchor_left = GLASS_F.position.x
-	rect.anchor_top = GLASS_F.position.y
-	rect.anchor_right = GLASS_F.position.x + GLASS_F.size.x
-	rect.anchor_bottom = GLASS_F.position.y + GLASS_F.size.y
-	rect.offset_left = -4.0
-	rect.offset_right = 4.0
-	rect.offset_top = -4.0
-	rect.offset_bottom = 4.0
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(rect)
-
-
-# ring of Minecraft blackstone bricks hugging the inside of the TV shell.
-# Anchored to the glass fractions so it sits right under the shell edge.
-func _add_block_ring(layer: CanvasLayer) -> void:
-	var src: Texture2D = load(TEX_BLOCK)
-	var img: Image = src.get_image()
-	if img.is_compressed():
-		img.decompress()
-	img.convert(Image.FORMAT_RGBA8)
-	img.resize(int(BLOCK_PX), int(BLOCK_PX), Image.INTERPOLATE_NEAREST)
-	var block_tex := ImageTexture.create_from_image(img)
-
-	var gx0 := GLASS_F.position.x
-	var gy0 := GLASS_F.position.y
-	var gx1 := GLASS_F.position.x + GLASS_F.size.x
-	var gy1 := GLASS_F.position.y + GLASS_F.size.y
-	var tuck := -4.0           # start slightly under the shell edge
-	var inset := RING_T - 4.0  # ...and end this far inside the glass
-
-	# left / right strips (full glass height), then top / bottom over the corners
-	_ring_strip(layer, block_tex, gx0, gy0, gx0, gy1, 0.0, RING_T, tuck, 0.0)
-	_ring_strip(layer, block_tex, gx1, gy0, gx1, gy1, -RING_T, 0.0, tuck, 0.0)
-	_ring_strip(layer, block_tex, gx0, gy0, gx1, gy0, 0.0, 0.0, tuck, inset)
-	_ring_strip(layer, block_tex, gx0, gy1, gx1, gy1, 0.0, 0.0, -inset, -tuck)
-
-
-func _ring_strip(layer: CanvasLayer, tex: Texture2D,
-		ax0: float, ay0: float, ax1: float, ay1: float,
-		ol: float, orr: float, ot: float, ob: float) -> void:
-	var tr := TextureRect.new()
-	tr.texture = tex
-	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tr.stretch_mode = TextureRect.STRETCH_TILE
-	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tr.anchor_left = ax0
-	tr.anchor_top = ay0
-	tr.anchor_right = ax1
-	tr.anchor_bottom = ay1
-	tr.offset_left = ol
-	tr.offset_right = orr
-	tr.offset_top = ot
-	tr.offset_bottom = ob
-	tr.self_modulate = RING_TINT   # extra-dark blackstone blocks
-	layer.add_child(tr)
 
 
 # ======================================================== juice / animations ==
