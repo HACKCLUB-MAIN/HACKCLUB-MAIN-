@@ -1,170 +1,137 @@
-[gd_scene format=3 uid="uid://dyww5cwm3k74a"]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" uid="uid://5g04xdcxflkn" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" uid="uid://bag1u11abys2d" path="res://scenes/pressure_plate.tscn" id="3_plate"]
-[ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_spikes"]
-[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
-[ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
-[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
-[ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="8_lava"]
-[ext_resource type="PackedScene" path="res://scenes/coin.tscn" id="9_coin"]
-[ext_resource type="PackedScene" uid="uid://dpgmav803bmcw" path="res://scenes/level_1.tscn" id="10_vcx5n"]
+[ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="4_kill"]
+[ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="5_lava"]
+[ext_resource type="PackedScene" path="res://scenes/coin.tscn" id="6_coin"]
 
-[sub_resource type="RectangleShape2D" id="ground"]
-size = Vector2(1152, 128)
+[sub_resource type="RectangleShape2D" id="ground_a"]
+size = Vector2(512, 128)
 
-[sub_resource type="RectangleShape2D" id="ledge"]
-size = Vector2(252, 16)
+[sub_resource type="RectangleShape2D" id="tower"]
+size = Vector2(176, 184)
 
-[sub_resource type="RectangleShape2D" id="ledge2"]
-size = Vector2(236, 16)
+[sub_resource type="RectangleShape2D" id="plateau"]
+size = Vector2(384, 288)
 
-[sub_resource type="RectangleShape2D" id="spike_kill"]
-size = Vector2(96, 120)
+[sub_resource type="RectangleShape2D" id="mid_ledge"]
+size = Vector2(160, 16)
 
 [sub_resource type="RectangleShape2D" id="border_wall"]
 size = Vector2(16, 128)
 
-[sub_resource type="RectangleShape2D" id="hill_c"]
-size = Vector2(60, 176)
+[sub_resource type="RectangleShape2D" id="wall_r"]
+size = Vector2(16, 416)
 
-[sub_resource type="RectangleShape2D" id="hill_d"]
-size = Vector2(88, 160)
+[sub_resource type="RectangleShape2D" id="pit_floor"]
+size = Vector2(80, 16)
 
-[node name="Level3" type="Node2D" unique_id=1517996696]
+[node name="Level3" type="Node2D"]
 script = ExtResource("1_level")
 
-[node name="World" type="StaticBody2D" parent="." unique_id=662926057]
+[node name="World" type="StaticBody2D" parent="."]
 
-[node name="Ground" type="CollisionShape2D" parent="World" unique_id=1485409630]
-position = Vector2(576, 584)
-shape = SubResource("ground")
+[node name="GroundA" type="CollisionShape2D" parent="World"]
+position = Vector2(256, 584)
+shape = SubResource("ground_a")
 
-[node name="Ledge1" type="CollisionShape2D" parent="World" unique_id=1334506235]
-position = Vector2(286, 448)
-shape = SubResource("ledge")
+[node name="Tower" type="CollisionShape2D" parent="World"]
+position = Vector2(680, 556)
+shape = SubResource("tower")
 
-[node name="Ledge2" type="CollisionShape2D" parent="World" unique_id=1812729349]
-position = Vector2(854, 448)
-shape = SubResource("ledge2")
+[node name="Plateau" type="CollisionShape2D" parent="World"]
+position = Vector2(960, 504)
+shape = SubResource("plateau")
 
-[node name="WallL" type="CollisionShape2D" parent="World" unique_id=887519283]
+[node name="MidLedge" type="CollisionShape2D" parent="World"]
+position = Vector2(496, 464)
+shape = SubResource("mid_ledge")
+
+[node name="WallL" type="CollisionShape2D" parent="World"]
 position = Vector2(8, 456)
 shape = SubResource("border_wall")
 
-[node name="WallR" type="CollisionShape2D" parent="World" unique_id=1385260689]
-position = Vector2(1144, 456)
-shape = SubResource("border_wall")
+[node name="WallR" type="CollisionShape2D" parent="World"]
+position = Vector2(1144, 440)
+shape = SubResource("wall_r")
 
-[node name="HillC" type="CollisionShape2D" parent="World" unique_id=1148611055]
-position = Vector2(1030, 560)
-shape = SubResource("hill_c")
+[node name="PitFloor" type="CollisionShape2D" parent="World"]
+position = Vector2(552, 640)
+shape = SubResource("pit_floor")
 
-[node name="HillD" type="CollisionShape2D" parent="World" unique_id=1641566554]
-position = Vector2(60, 568)
-shape = SubResource("hill_d")
-
-[node name="GroundVis" type="Polygon2D" parent="." unique_id=2050235215]
+[node name="GroundAVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
-polygon = PackedVector2Array(0, 520, 1152, 520, 1152, 648, 0, 648)
+polygon = PackedVector2Array(0, 520, 512, 520, 512, 648, 0, 648)
 
-[node name="Ledge1Vis" type="Polygon2D" parent="." unique_id=1969588597]
+[node name="PitFloorVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(512, 556, 592, 556, 592, 648, 512, 648)
+
+[node name="MidLedgeVis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(160, 440, 412, 440, 412, 456, 160, 456)
+polygon = PackedVector2Array(416, 456, 576, 456, 576, 472, 416, 472)
 
-[node name="Ledge2Vis" type="Polygon2D" parent="." unique_id=352166012]
+[node name="TowerVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(592, 464, 768, 464, 768, 648, 592, 648)
+
+[node name="TowerTopVis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(736, 440, 972, 440, 972, 456, 736, 456)
+polygon = PackedVector2Array(592, 464, 768, 464, 768, 480, 592, 480)
 
-[node name="WallLVis" type="Polygon2D" parent="." unique_id=1160986046]
+[node name="PlateauVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(768, 360, 1152, 360, 1152, 648, 768, 648)
+
+[node name="PlateauTopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(768, 360, 1152, 360, 1152, 376, 768, 376)
+
+[node name="WallLVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 
-[node name="WallRVis" type="Polygon2D" parent="." unique_id=382150635]
+[node name="WallRVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
-polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+polygon = PackedVector2Array(1136, 232, 1152, 232, 1152, 648, 1136, 648)
 
-[node name="HillCVis" type="Polygon2D" parent="." unique_id=1658511192]
-color = Color(0.42, 0.3, 0.22, 1)
-polygon = PackedVector2Array(1000, 472, 1060, 472, 1060, 648, 1000, 648)
+[node name="LavaPit" parent="." instance=ExtResource("5_lava")]
+position = Vector2(552, 518)
+width = 88.0
+depth = 40.0
+bubble_count = 4
 
-[node name="HillCTopVis" type="Polygon2D" parent="." unique_id=630382390]
-color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(1000, 472, 1060, 472, 1060, 488, 1000, 488)
-
-[node name="HillDVis" type="Polygon2D" parent="." unique_id=2104704037]
-color = Color(0.42, 0.3, 0.22, 1)
-polygon = PackedVector2Array(16, 488, 104, 488, 104, 648, 16, 648)
-
-[node name="HillDTopVis" type="Polygon2D" parent="." unique_id=1943031076]
-color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(16, 488, 104, 488, 104, 504, 16, 504)
-
-[node name="LavaPool" parent="." unique_id=1982879300 instance=ExtResource("8_lava")]
-position = Vector2(650, 518)
-width = 96.0
-depth = 30.0
-bubble_count = 5
-
-[node name="SpikeKill" parent="." unique_id=753758800 instance=ExtResource("7_kill")]
+[node name="PitKill" parent="." instance=ExtResource("4_kill")]
 modulate = Color(1, 1, 1, 0)
-position = Vector2(650, 576)
+position = Vector2(552, 560)
 
-[node name="Collision" parent="SpikeKill" index="0"]
-shape = SubResource("spike_kill")
+[node name="LavaTower" parent="." instance=ExtResource("5_lava")]
+position = Vector2(748, 464)
+width = 40.0
+depth = 20.0
+bubble_count = 2
 
-[node name="Safety" parent="." unique_id=518714301 instance=ExtResource("7_kill")]
+[node name="TowerKill" parent="." instance=ExtResource("4_kill")]
 modulate = Color(1, 1, 1, 0)
-position = Vector2(576, 700)
+position = Vector2(748, 466)
+scale = Vector2(0.3125, 1.0)
 
-[node name="Plate1" parent="." unique_id=414259374 instance=ExtResource("3_plate")]
-position = Vector2(264, 434)
-targets = Array[NodePath]([NodePath("../Gate1")])
+[node name="ExitDoor" parent="." instance=ExtResource("3_door")]
+position = Vector2(1080, 296)
 
-[node name="Spikes1" parent="." unique_id=562089340 instance=ExtResource("4_spikes")]
-position = Vector2(350, 440)
-
-[node name="Gate1" parent="." unique_id=1792036463 instance=ExtResource("5_gate")]
-position = Vector2(520, 408)
-
-[node name="Plate2" parent="." unique_id=745338737 instance=ExtResource("3_plate")]
-position = Vector2(830, 434)
-targets = Array[NodePath]([NodePath("../Gate2")])
-
-[node name="Gate2" parent="." unique_id=45398451 instance=ExtResource("5_gate")]
-position = Vector2(980, 408)
-auto_close_delay = 4.0
-
-[node name="Spikes2" parent="." unique_id=1021489870 instance=ExtResource("4_spikes")]
-position = Vector2(900, 440)
-
-[node name="Spikes3" parent="." unique_id=566357548 instance=ExtResource("4_spikes")]
-position = Vector2(470, 520)
-
-[node name="ExitDoor" parent="." unique_id=1216023990 instance=ExtResource("6_door")]
-position = Vector2(1112, 392)
-
-[node name="Player" parent="." unique_id=1721741611 instance=ExtResource("2_player")]
+[node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(160, 498)
 
-[node name="CoinLedge1" parent="." unique_id=397890141 instance=ExtResource("9_coin")]
-position = Vector2(210, 396)
+[node name="CoinMid" parent="." instance=ExtResource("6_coin")]
+position = Vector2(496, 416)
 
-[node name="CoinPlate1" parent="." unique_id=1712884098 instance=ExtResource("9_coin")]
-position = Vector2(264, 386)
+[node name="CoinTower" parent="." instance=ExtResource("6_coin")]
+position = Vector2(640, 424)
 
-[node name="CoinHop" parent="." unique_id=122241652 instance=ExtResource("9_coin")]
-position = Vector2(650, 400)
+[node name="CoinPlateauA" parent="." instance=ExtResource("6_coin")]
+position = Vector2(900, 320)
 
-[node name="CoinLedge2" parent="." unique_id=1640549445 instance=ExtResource("9_coin")]
-position = Vector2(790, 396)
-
-[node name="CoinGate" parent="." unique_id=1357795030 instance=ExtResource("9_coin")]
-position = Vector2(980, 254)
-
-[node name="CoinFinal" parent="." unique_id=1439748272 instance=ExtResource("9_coin")]
-position = Vector2(1080, 466)
-
-[node name="Level1" parent="." unique_id=2012662618 instance=ExtResource("10_vcx5n")]
-position = Vector2(1611, -437)
+[node name="CoinPlateauB" parent="." instance=ExtResource("6_coin")]
+position = Vector2(1000, 320)

@@ -629,10 +629,10 @@ func _launch_pulse() -> void:
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
-## The difficulty boxes shown when the player presses PLAY.
+## The three difficulty boxes shown when the player presses PLAY.
 ## Each box is tinted and labeled differently so the difficulty reads at a
-## glance: green stroll / amber deepslate mine / red nether inferno /
-## violet obsidian spire. Every level is always playable - no locks.
+## glance: green stroll / amber deepslate mine / red obsidian spire. Every
+## level is always playable - no locks.
 func _fill_level_select() -> void:
 	var defs := [
 		{
@@ -651,17 +651,10 @@ func _fill_level_select() -> void:
 		},
 		{
 			"n": 3, "title": "HARD",
-			"sub": "LEVEL 3  -  NETHER INFERNO",
+			"sub": "LEVEL 3  -  OBSIDIAN SPIRE",
 			"tint": Color(1.16, 0.62, 0.55),
 			"col": Color8(140, 28, 22),
 			"pip": Color8(204, 48, 34),
-		},
-		{
-			"n": 4, "title": "NIGHTMARE",
-			"sub": "LEVEL 4  -  OBSIDIAN SPIRE",
-			"tint": Color(1.02, 0.72, 1.22),
-			"col": Color8(84, 30, 116),
-			"pip": Color8(148, 66, 200),
 		},
 	]
 	for d in defs:
