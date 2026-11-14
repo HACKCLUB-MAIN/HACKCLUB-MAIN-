@@ -34,7 +34,6 @@ func _on_body_entered(body: Node) -> void:
 	body.set_physics_process(false)   # freeze the body; the ghost keeps the run
 
 	Juice.hit_stop(0.12, 0.05)        # freeze-frame
-	Juice.add_trauma(0.6)             # world kick
 	Juice.flash(Color(0.85, 0.12, 0.12, 0.38))
 	Juice.burst(body.global_position, Color(1.0, 0.28, 0.22), 26, 150.0)
 	Juice.play("death")

@@ -84,8 +84,6 @@ func _physics_process(delta: float) -> void:
 		_step_timer = 0.0
 	if is_on_floor() and not was_on_floor:
 		Juice.play("land", 0.95 + minf(_prev_fall / 600.0, 1.0) * 0.25, -10.0)
-		if _prev_fall > 380.0:
-			Juice.add_trauma(0.18)   # hard landing shakes the world a bit
 	_prev_fall = velocity.y if not is_on_floor() else 0.0
 
 	# --- dust while wall-sliding ---

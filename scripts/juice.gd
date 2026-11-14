@@ -1,25 +1,13 @@
 extends Node
 ## JUICE — autoload singleton ("Juice" in Project Settings > Autoload).
 ## Every feedback layer the game plays lives here, so gameplay scripts can
-## just call Juice.add_trauma(0.5) / Juice.play("jump") / Juice.burst(...).
+## just call Juice.play("jump") / Juice.burst(...).
 ##
-## Channels: screen shake (decaying trauma), hit-stop (time scale dip),
-## full-screen flash, particle bursts, floating "+N" text, a round-robin
-## SFX pool on the "SFX" bus, the ESC pause menu and the win screen.
+## Channels: hit-stop (time scale dip), full-screen flash, particle bursts,
+## floating "+N" text, a round-robin SFX pool on the "SFX" bus, the ESC
+## pause menu and the win screen. Screen shake was removed on request.
 
 const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
-
-# --- shake -------------------------------------------------------------------
-const SHAKE_DECAY := 1.4       # trauma lost per second
-const SHAKE_OFFSET := Vector2(14.0, 9.0)
-const SHAKE_ROLL := 0.05       # radians of world roll at max trauma
-
-var _trauma := 0.0
-var _shake_t := 0.0
-var _shake_root: Node = null   # the level root; only it gets shaken
-
-# --- hit-stop ----------------------------------------------------------------
-var _hit_stop_id := 0
 
 # --- flags other systems check ------------------------------------------------
 var death_pending := false     # a killzone death animation is playing
@@ -43,54 +31,24 @@ func _enter_tree() -> void:
 
 
 # =============================================================== screen shake =
-## Hits ADD trauma (0..1); they never reset it, so overlapping hits stack.
-## Shake = trauma^2: small hits barely move, big hits punch.
-func add_trauma(amount: float) -> void:
-	_trauma = clampf(_trauma + amount, 0.0, 1.0)
+## REMOVED: the world-shake was disorienting and froze perceived movement.
+## These stubs stay so older/teammate code calling them keeps working.
+
+func add_trauma(_amount: float) -> void:
+	pass
 
 
-## Levels call this once in _ready(): the root that shakes (visual only).
-func shake_register(root: Node) -> void:
-	_shake_root = root
-
-
-func _process(delta: float) -> void:
-	_update_shake(delta)
-
-
-func _update_shake(delta: float) -> void:
-	if _trauma <= 0.0:
-		return
-	_trauma = maxf(_trauma - SHAKE_DECAY * delta, 0.0)
-	if _trauma <= 0.0:   # fully decayed: snap the world back to rest
-		if _shake_root != null and is_instance_valid(_shake_root) and "position" in _shake_root:
-			_shake_root.position = Vector2.ZERO
-		return
-	_shake_t += delta * 30.0
-	var root := _shake_root
-	if root == null or not is_instance_valid(root) or not root.is_inside_tree():
-		return
-	if not GameState.screen_shake:
-		if "position" in root:
-			root.position = Vector2.ZERO
-		return
-	var s := _trauma * _trauma   # quadratic: gentle low, sharp high
-	# Smooth pseudo-random via sampled sin, NOT rand each frame (that buzzes).
-	root.position = Vector2(
-		SHAKE_OFFSET.x * s * sin(_shake_t * 1.7),
-		SHAKE_OFFSET.y * s * sin(_shake_t * 2.3))
+func shake_register(_root: Node) -> void:
+	pass
 
 
 # =================================================================== hit-stop =
 ## Briefly stop time to sell an impact. Restores with a REAL-TIME timer
 ## (ignore_time_scale), so it always resumes even at time scale ~0.
 func hit_stop(duration := 0.08, slow := 0.05) -> void:
-	_hit_stop_id += 1
-	var my_id := _hit_stop_id
 	Engine.time_scale = slow
 	await get_tree().create_timer(duration, true, false, true).timeout
-	if my_id == _hit_stop_id:      # a newer hit-stop owns the restore
-		Engine.time_scale = 1.0
+	Engine.time_scale = 1.0
 
 
 # ====================================================================== flash =

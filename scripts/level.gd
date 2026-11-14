@@ -86,7 +86,6 @@ func _ready() -> void:
 
 	# --- juice autoload integration ---
 	Juice.on_level_start()      # clear death/pause state from the previous scene
-	Juice.shake_register(self)  # the level root is what screen shake moves
 	_build_hud()
 	_spawn_pop()
 

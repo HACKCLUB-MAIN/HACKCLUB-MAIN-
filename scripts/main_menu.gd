@@ -740,8 +740,6 @@ func _fill_settings_widgets() -> void:
 		func(on: bool) -> void: GameState.set_fireflies(on))
 	_settings_toggle("CLOUD DRIFT", func() -> bool: return GameState.cloud_drift,
 		func(on: bool) -> void: GameState.set_cloud_drift(on))
-	_settings_toggle("SCREEN SHAKE", func() -> bool: return GameState.screen_shake,
-		func(on: bool) -> void: GameState.set_screen_shake(on))
 	_settings_toggle("SHOW FPS", func() -> bool: return GameState.show_fps,
 		func(on: bool) -> void: GameState.set_show_fps(on))
 
