@@ -10,9 +10,9 @@ extends Node
 ##      ended becomes THE ghost, overwriting the previous recording.
 ##   3. The ghost replays frame by frame, in sync with the player
 ##      (both run at the same physics tick rate).
-##   4. When the ghost reaches the end of its recording it STAYS where
-##      it stopped — so if the player died on a pressure plate,
-##      the ghost keeps holding it down.
+##   4. When the ghost reaches the end of its recording (the moment of
+##      death) it LOOPS back to the start and replays the run again,
+##      repeating the doomed run forever.
 
 const MAX_FRAMES := 3600  # Recording cap: 60 seconds at 60 physics FPS
 

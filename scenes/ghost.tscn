@@ -1,9 +1,46 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=8 format=3 uid="uid://bi2lgtm20l1sg"]
 
-[ext_resource type="Script" path="res://scripts/ghost.gd" id="1_ghost"]
+[ext_resource type="Script" uid="uid://bgn3e1m8uty74" path="res://scripts/ghost.gd" id="1_ghost"]
+[ext_resource type="Texture2D" uid="uid://ccuw27u077l0s" path="res://assets/Ghost and Skull sprites/Ghost and Skull sprites/ghostSpritesheetfull.png" id="2_sheet"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(20, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l5lq6"]
+atlas = ExtResource("2_sheet")
+region = Rect2(208, 0, 52, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bbnym"]
+atlas = ExtResource("2_sheet")
+region = Rect2(260, 0, 52, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_veat2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(312, 0, 52, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5mfnq"]
+atlas = ExtResource("2_sheet")
+region = Rect2(364, 0, 52, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3vl2n"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l5lq6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bbnym")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_veat2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5mfnq")
+}],
+"loop": 1,
+"name": &"not move + move",
+"speed": 10.0
+}]
 
 [node name="Ghost" type="Area2D" groups=["ghost"]]
 monitoring = false
@@ -12,6 +49,8 @@ script = ExtResource("1_ghost")
 [node name="Collision" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.4, 0.9, 1, 0.6)
-polygon = PackedVector2Array(-10, -14, 10, -14, 10, 14, -10, 14)
+[node name="Visual" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_3vl2n")
+animation = &"not move + move"
+autoplay = "not move + move"

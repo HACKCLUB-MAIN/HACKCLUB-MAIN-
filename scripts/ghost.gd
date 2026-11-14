@@ -1,19 +1,17 @@
 extends Area2D
 ## Replays the player's last run frame by frame.
-## When the recording ends (the moment the player died), the ghost STAYS
-## where it stopped — so if the player died on a pressure plate,
-## the ghost keeps holding it down.
+## When the recording ends (the moment the player died — e.g. jumping into
+## the lava), the ghost LOOPS: it restarts its replay from the beginning,
+## repeating the doomed run forever instead of freezing in place.
 ##
 ## The ghost has no physics: it just teleports to the recorded positions,
 ## which guarantees a perfect replay of wall jumps, bounce pads, etc.
 
-const REST_ALPHA := 0.45   # opacity once the replay is finished
 const FLIP_EPSILON := 0.5  # ignore tiny velocities when flipping the sprite
 
 var positions := PackedVector2Array()
 var velocities := PackedVector2Array()
 var frame := 0
-var finished := false
 
 @onready var visual: Node2D = $Visual
 
@@ -27,18 +25,13 @@ func setup(data: Dictionary) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if finished:
+	if positions.is_empty():
 		return
+	# Reached the moment the previous run died: loop back to the start.
 	if frame >= positions.size():
-		_finish()
-		return
+		frame = 0
 	position = positions[frame]
 	if frame < velocities.size() and "flip_h" in visual:
 		if absf(velocities[frame].x) > FLIP_EPSILON:
 			visual.flip_h = velocities[frame].x < 0.0
 	frame += 1
-
-
-func _finish() -> void:
-	finished = true
-	modulate.a = REST_ALPHA
