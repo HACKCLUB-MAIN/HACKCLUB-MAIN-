@@ -127,6 +127,9 @@ var _tweens: Dictionary = {}          # Control -> active scale tween
 
 var _intro_done := false
 var _busy := false
+
+## true while a pre-level briefing panel is waiting for ESC to dismiss it
+var _briefing_wait := false
 var _t := 0.0
 var _parallax := Vector2.ZERO
 
@@ -754,17 +757,18 @@ func _fill_level_select() -> void:
 ## dying is not the end, it is information. The ghost replays the failed run.
 func _ghost_briefing() -> void:
 	await _briefing_panel("THE GHOST OF YOUR PAST RUN", GHOST_BRIEFING,
-		COL_RUST, 10, 4.5)
+		COL_RUST, 10)
 
 ## HARD gets one honest warning before the dive begins.
 func _hard_warning() -> void:
 	await _briefing_panel("HARD - OBSIDIAN SPIRE", SPIRE_WARNING,
-		Color8(230, 92, 74), 12, 3.5)
+		Color8(230, 92, 74), 12)
 
-## Dark-screen panel shared by the pre-level briefings: head + body text,
-## held on screen for `hold` seconds, then fades out and frees itself.
+## Dark-screen panel shared by the pre-level briefings: head + body text.
+## The panel does NOT advance on a timer — it stays up until the player
+## presses ESC, then fades out and frees itself.
 func _briefing_panel(head_text: String, body_text: String, head_col: Color,
-		body_size := 10, hold := 4.5) -> void:
+		body_size := 10) -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 40
 	add_child(layer)
@@ -808,17 +812,26 @@ func _briefing_panel(head_text: String, body_text: String, head_col: Color,
 	body.offset_right = -30.0
 	panel.add_child(body)
 
-	var hint := _mk_label("GET READY...", _font_pixel, 8,
+	var hint := _mk_label("PRESS ESC TO MOVE TO THE GAME", _font_pixel, 8,
 		Color8(247, 230, 196, 160))
 	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	hint.offset_top = -38.0
 	hint.offset_bottom = -16.0
 	panel.add_child(hint)
+	# gentle blink so the ESC hint is impossible to miss
+	var blink := hint.create_tween().set_loops()
+	blink.tween_property(hint, "modulate:a", 0.45, 0.6)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	blink.tween_property(hint, "modulate:a", 1.0, 0.6)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 	var tw := create_tween()
 	tw.tween_property(panel, "modulate:a", 1.0, 0.35)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	await get_tree().create_timer(hold).timeout
+	# the panel never times out: it only moves on when the player presses ESC
+	_briefing_wait = true
+	while _briefing_wait:
+		await get_tree().process_frame
 	var out := create_tween().set_parallel()
 	out.tween_property(dim, "color:a", 0.0, 0.35)
 	out.tween_property(panel, "modulate:a", 0.0, 0.35)
@@ -1093,6 +1106,10 @@ func _input(event: InputEvent) -> void:
 	if _popup_box.visible and _rebind_action == "" and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_close_popup()
+		return
+	# a briefing panel is up: ESC dismisses it (the panel never times out)
+	if _briefing_wait and not _popup_box.visible and event.is_action_pressed("ui_cancel"):
+		_briefing_wait = false
 
 # ================================================================== layout ==
 # one 32px blackstone block texture (nearest-upscaled, like the frame ring)

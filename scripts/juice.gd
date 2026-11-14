@@ -498,6 +498,18 @@ func show_win() -> void:
 	stats.add_theme_color_override("font_color", Color(0.32, 0.27, 0.22))
 	vbox.add_child(stats)
 
+	# clearing the HARD level earns one last wink from the spire
+	if GameState.current_level == 3:
+		var wink := Label.new()
+		wink.text = "I THINK IT IS EASY ACTUALLY"
+		wink.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		wink.add_theme_font_override("font", FONT)
+		wink.add_theme_font_size_override("font_size", 15)
+		wink.add_theme_color_override("font_color", Color8(230, 92, 74))
+		wink.add_theme_color_override("font_outline_color", Color(0.1, 0.06, 0.06))
+		wink.add_theme_constant_override("outline_size", 5)
+		vbox.add_child(wink)
+
 	var first := _menu_button("PLAY AGAIN",
 		func() -> void:
 			_force_unpause()
