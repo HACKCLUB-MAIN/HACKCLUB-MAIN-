@@ -50,6 +50,9 @@ size = Vector2(80, 176)
 [sub_resource type="RectangleShape2D" id="hill_d"]
 size = Vector2(88, 160)
 
+[sub_resource type="RectangleShape2D" id="upper2"]
+size = Vector2(120, 16)
+
 [sub_resource type="RectangleShape2D" id="lava2_kill"]
 size = Vector2(96, 80)
 
@@ -106,6 +109,14 @@ shape = SubResource("hill_c")
 position = Vector2(44, 568)
 shape = SubResource("hill_d")
 
+[node name="Upper1" type="CollisionShape2D" parent="World"]
+position = Vector2(700, 308)
+shape = SubResource("upper2")
+
+[node name="Upper2" type="CollisionShape2D" parent="World"]
+position = Vector2(920, 248)
+shape = SubResource("upper2")
+
 [node name="GroundAVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 520, 640, 520, 640, 648, 0, 648)
@@ -137,6 +148,14 @@ polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 [node name="WallRVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+
+[node name="Upper1Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(640, 300, 760, 300, 760, 316, 640, 316)
+
+[node name="Upper2Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(860, 240, 980, 240, 980, 256, 860, 256)
 
 [node name="HillAVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
@@ -218,6 +237,12 @@ shape = SubResource("lava2_kill")
 
 [node name="Spikes2" parent="." instance=ExtResource("4_spikes")]
 position = Vector2(1050, 520)
+
+[node name="CoinHigh1" parent="." instance=ExtResource("10_coin")]
+position = Vector2(700, 258)
+
+[node name="CoinHigh2" parent="." instance=ExtResource("10_coin")]
+position = Vector2(920, 198)
 
 [node name="ExitDoor" parent="." instance=ExtResource("6_door")]
 position = Vector2(1112, 392)

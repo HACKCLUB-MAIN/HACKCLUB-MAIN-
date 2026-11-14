@@ -33,6 +33,8 @@ var _pool_i := 0
 # --- overlays -------------------------------------------------------------------
 var _pause_layer: CanvasLayer = null
 var _win_layer: CanvasLayer = null
+var _tutorial_layer: CanvasLayer = null
+var tutorial_shown := false     # shown once per game session
 
 
 func _enter_tree() -> void:
@@ -255,9 +257,106 @@ func _pl(path: String) -> AudioStream:
 	return load(path) as AudioStream
 
 
+# ================================================================= tutorial ==
+## Small "how to play" card shown the first time a level starts in a session.
+## The tree is paused until any key or the GOT IT button dismisses it.
+func show_tutorial() -> void:
+	if _tutorial_layer != null:
+		return
+	tutorial_shown = true
+	get_tree().paused = true
+	play("pause_open")
+	_tutorial_layer = CanvasLayer.new()
+	_tutorial_layer.layer = 60   # above the block-curtain intro
+	_tutorial_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_tutorial_layer)
+
+	var dim := ColorRect.new()
+	dim.color = Color(0.05, 0.03, 0.08, 0.0)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tutorial_layer.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_tutorial_layer.add_child(center)
+
+	var panel := _panel(500.0, 470.0)
+	center.add_child(panel)
+	_tutorial_layer.set_meta("panel", panel)
+	_tutorial_layer.set_meta("dim", dim)
+	var vbox: VBoxContainer = panel.get_meta("vbox")
+
+	var title := Label.new()
+	title.text = "HOW TO PLAY"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_override("font", FONT)
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", Color(0.78, 0.22, 0.16))
+	title.add_theme_color_override("font_outline_color", Color(0.1, 0.08, 0.1))
+	title.add_theme_constant_override("outline_size", 5)
+	vbox.add_child(title)
+
+	var lines := Label.new()
+	lines.text = "\n".join([
+		"MOVE   A / D  or  <- / ->",
+		"JUMP   %s  /  W  /  UP" % GameState.key_name("jump"),
+		"",
+		"Push into a wall + jump = WALL JUMP",
+		"Orange pads launch you HIGH",
+		"",
+		"GOAL: reach the EXIT DOOR",
+		"Coins buy skins & upgrades in the shop",
+		"",
+		"DIE and your GHOST replays the run!",
+		"R restarts.  %s pauses." % GameState.key_name("pause"),
+	])
+	lines.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lines.add_theme_font_override("font", FONT)
+	lines.add_theme_font_size_override("font_size", 11)
+	lines.add_theme_color_override("font_color", Color(0.32, 0.27, 0.22))
+	lines.add_theme_constant_override("line_spacing", 8)
+	vbox.add_child(lines)
+
+	var got_it := _menu_button("GOT IT!", close_tutorial)
+	vbox.add_child(got_it)
+	got_it.grab_focus()
+
+	panel.pivot_offset = panel.custom_minimum_size / 2.0
+	panel.scale = Vector2(0.6, 0.6)
+	var tw := _tutorial_layer.create_tween().set_parallel()
+	tw.tween_property(dim, "color:a", 0.6, 0.22)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.3)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func close_tutorial() -> void:
+	if _tutorial_layer == null:
+		return
+	var layer := _tutorial_layer
+	_tutorial_layer = null
+	play("pause_close")
+	var panel: NinePatchRect = layer.get_meta("panel")
+	var dim: ColorRect = layer.get_meta("dim")
+	var tw := layer.create_tween()
+	tw.tween_property(panel, "scale", Vector2(0.6, 0.6), 0.16)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.parallel().tween_property(dim, "color:a", 0.0, 0.16)
+	tw.tween_callback(func() -> void:
+		if _pause_layer == null and _tutorial_layer == null and _win_layer == null:
+			get_tree().paused = false
+		layer.queue_free())
+
+
 # ================================================================ pause menu ==
 ## ESC (the rebindable "pause" action) toggles the pause menu in levels.
 func _unhandled_input(event: InputEvent) -> void:
+	if _tutorial_layer != null:
+		# any key dismisses the tutorial (the GOT IT button handles the mouse)
+		if (event is InputEventKey and event.pressed) or event.is_action_pressed("pause"):
+			close_tutorial()
+			get_viewport().set_input_as_handled()
+		return
 	if win_open or death_pending:
 		return
 	if event.is_action_pressed("pause") and _in_level():

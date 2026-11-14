@@ -77,6 +77,10 @@ func _ready() -> void:
 	_build_hud()
 	_spawn_pop()
 
+	# first level of the session: teach the basics before the curtain falls
+	if not Juice.tutorial_shown:
+		Juice.show_tutorial()
+
 	# TEMP: verification hook, remove after testing
 	if "--shot-cave" in OS.get_cmdline_user_args():
 		await get_tree().create_timer(2.2).timeout

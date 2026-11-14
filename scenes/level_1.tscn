@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
 [ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="8_lava"]
 [ext_resource type="PackedScene" path="res://scenes/coin.tscn" id="9_coin"]
+[ext_resource type="PackedScene" path="res://scenes/bounce_pad.tscn" id="10_pad"]
 
 [sub_resource type="RectangleShape2D" id="ground_a"]
 size = Vector2(512, 128)
@@ -36,6 +37,12 @@ size = Vector2(64, 176)
 
 [sub_resource type="RectangleShape2D" id="hill_b"]
 size = Vector2(120, 176)
+
+[sub_resource type="RectangleShape2D" id="upper1"]
+size = Vector2(160, 16)
+
+[sub_resource type="RectangleShape2D" id="upper2"]
+size = Vector2(120, 16)
 
 [node name="Level1" type="Node2D" unique_id=2012662618]
 script = ExtResource("1_level")
@@ -82,6 +89,22 @@ shape = SubResource("hill_b")
 position = Vector2(576, 448)
 shape = SubResource("hop_platform")
 
+[node name="Upper1" type="CollisionShape2D" parent="World"]
+position = Vector2(120, 324)
+shape = SubResource("upper1")
+
+[node name="Upper2" type="CollisionShape2D" parent="World"]
+position = Vector2(360, 292)
+shape = SubResource("upper2")
+
+[node name="Upper3" type="CollisionShape2D" parent="World"]
+position = Vector2(580, 324)
+shape = SubResource("upper2")
+
+[node name="Upper4" type="CollisionShape2D" parent="World"]
+position = Vector2(820, 292)
+shape = SubResource("upper2")
+
 [node name="GroundAVis" type="Polygon2D" parent="." unique_id=1186995662]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 520, 512, 520, 512, 648, 0, 648)
@@ -97,6 +120,22 @@ polygon = PackedVector2Array(512, 440, 640, 440, 640, 456, 512, 456)
 [node name="LedgeVis" type="Polygon2D" parent="." unique_id=1197863900]
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(200, 440, 452, 440, 452, 456, 200, 456)
+
+[node name="Upper1Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(40, 316, 200, 316, 200, 332, 40, 332)
+
+[node name="Upper2Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(300, 284, 420, 284, 420, 300, 300, 300)
+
+[node name="Upper3Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(520, 316, 640, 316, 640, 332, 520, 332)
+
+[node name="Upper4Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(760, 284, 880, 284, 880, 300, 760, 300)
 
 [node name="WallLVis" type="Polygon2D" parent="." unique_id=1451141206]
 color = Color(0.42, 0.3, 0.22, 1)
@@ -203,3 +242,18 @@ position = Vector2(940, 472)
 
 [node name="CoinFinal" parent="." instance=ExtResource("9_coin")]
 position = Vector2(1060, 466)
+
+[node name="PadToUpper" parent="." instance=ExtResource("10_pad")]
+position = Vector2(130, 520)
+
+[node name="CoinTop1" parent="." instance=ExtResource("9_coin")]
+position = Vector2(120, 276)
+
+[node name="CoinTop2" parent="." instance=ExtResource("9_coin")]
+position = Vector2(360, 244)
+
+[node name="CoinTop3" parent="." instance=ExtResource("9_coin")]
+position = Vector2(580, 276)
+
+[node name="CoinTop4" parent="." instance=ExtResource("9_coin")]
+position = Vector2(820, 244)
