@@ -142,6 +142,10 @@ func burst(global_pos: Vector2, color: Color, count := 18, speed := 130.0) -> vo
 
 ## A few soft dust motes drifting up (used for footsteps / wall slides).
 func puff(global_pos: Vector2, color := Color(0.85, 0.78, 0.62, 0.55), count := 3) -> void:
+	_puff_run.call_deferred(global_pos, color, count)
+
+
+func _puff_run(global_pos: Vector2, color: Color, count: int) -> void:
 	var root := get_tree().current_scene
 	if root == null:
 		return

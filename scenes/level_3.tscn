@@ -20,11 +20,8 @@ size = Vector2(252, 16)
 [sub_resource type="RectangleShape2D" id="ledge2"]
 size = Vector2(236, 16)
 
-[sub_resource type="RectangleShape2D" id="hop_a"]
-size = Vector2(64, 16)
-
-[sub_resource type="RectangleShape2D" id="hop_b"]
-size = Vector2(64, 16)
+[sub_resource type="RectangleShape2D" id="spike_kill"]
+size = Vector2(96, 120)
 
 [sub_resource type="RectangleShape2D" id="border_wall"]
 size = Vector2(16, 128)
@@ -51,14 +48,6 @@ shape = SubResource("ledge")
 [node name="Ledge2" type="CollisionShape2D" parent="World" unique_id=1812729349]
 position = Vector2(854, 448)
 shape = SubResource("ledge2")
-
-[node name="HopA" type="CollisionShape2D" parent="World" unique_id=61871994]
-position = Vector2(520, 448)
-shape = SubResource("hop_a")
-
-[node name="HopB" type="CollisionShape2D" parent="World" unique_id=1143332251]
-position = Vector2(656, 448)
-shape = SubResource("hop_b")
 
 [node name="WallL" type="CollisionShape2D" parent="World" unique_id=887519283]
 position = Vector2(8, 456)
@@ -88,14 +77,6 @@ polygon = PackedVector2Array(160, 440, 412, 440, 412, 456, 160, 456)
 color = Color(0.5, 0.38, 0.27, 1)
 polygon = PackedVector2Array(736, 440, 972, 440, 972, 456, 736, 456)
 
-[node name="HopAVis" type="Polygon2D" parent="." unique_id=90533483]
-color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(488, 440, 552, 440, 552, 456, 488, 456)
-
-[node name="HopBVis" type="Polygon2D" parent="." unique_id=1687308506]
-color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(624, 440, 688, 440, 688, 456, 624, 456)
-
 [node name="WallLVis" type="Polygon2D" parent="." unique_id=1160986046]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
@@ -122,13 +103,16 @@ polygon = PackedVector2Array(16, 488, 104, 488, 104, 504, 16, 504)
 
 [node name="LavaPool" parent="." unique_id=1982879300 instance=ExtResource("8_lava")]
 position = Vector2(650, 518)
-width = 132.0
+width = 96.0
 depth = 30.0
 bubble_count = 5
 
 [node name="SpikeKill" parent="." unique_id=753758800 instance=ExtResource("7_kill")]
 modulate = Color(1, 1, 1, 0)
-position = Vector2(650, 560)
+position = Vector2(650, 576)
+
+[node name="Collision" parent="SpikeKill" index="0"]
+shape = SubResource("spike_kill")
 
 [node name="Safety" parent="." unique_id=518714301 instance=ExtResource("7_kill")]
 modulate = Color(1, 1, 1, 0)
@@ -171,7 +155,7 @@ position = Vector2(210, 396)
 position = Vector2(264, 386)
 
 [node name="CoinHop" parent="." unique_id=122241652 instance=ExtResource("9_coin")]
-position = Vector2(588, 410)
+position = Vector2(650, 400)
 
 [node name="CoinLedge2" parent="." unique_id=1640549445 instance=ExtResource("9_coin")]
 position = Vector2(790, 396)
