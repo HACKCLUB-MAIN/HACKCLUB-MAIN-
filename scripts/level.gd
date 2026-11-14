@@ -55,10 +55,23 @@ func _ready() -> void:
 	var ghosts_node := Node2D.new()
 	ghosts_node.name = "Ghosts"
 	add_child(ghosts_node)
-	if not RunManager.ghost_data.is_empty():
+	# The ghost only exists once the player has died at least once: the run
+	# that just ended becomes the recording it replays (looping forever).
+	var ghost_data: Dictionary = RunManager.ghost_data
+	if not ghost_data.is_empty():
+		# The ghost must begin exactly at the player's spawn area — force the
+		# recording's first frame to the player's spawn so it can never
+		# appear below/beside the spawn point.
+		var player := get_node_or_null("Player")
+		if player != null:
+			var rec_positions: PackedVector2Array = ghost_data.get(
+				"positions", PackedVector2Array())
+			if not rec_positions.is_empty():
+				rec_positions[0] = player.position
+				ghost_data["positions"] = rec_positions
 		var ghost := GHOST_SCENE.instantiate()
 		ghosts_node.add_child(ghost)
-		ghost.setup(RunManager.ghost_data)
+		ghost.setup(ghost_data)
 
 	_build_frame()
 	_block_curtain()
