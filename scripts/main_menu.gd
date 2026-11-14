@@ -128,7 +128,7 @@ var _tweens: Dictionary = {}          # Control -> active scale tween
 var _intro_done := false
 var _busy := false
 
-## true while a pre-level briefing panel is waiting for ESC to dismiss it
+## true while a pre-level briefing panel is up (auto-dismisses after 3 s)
 var _briefing_wait := false
 var _t := 0.0
 var _parallax := Vector2.ZERO
@@ -765,8 +765,8 @@ func _hard_warning() -> void:
 		Color8(230, 92, 74), 12)
 
 ## Dark-screen panel shared by the pre-level briefings: head + body text.
-## The panel does NOT advance on a timer — it stays up until the player
-## presses ESC, then fades out and frees itself.
+## The panel dismisses itself after 3 seconds — or sooner if the player
+## presses ESC — then fades out and frees itself.
 func _briefing_panel(head_text: String, body_text: String, head_col: Color,
 		body_size := 10) -> void:
 	var layer := CanvasLayer.new()
@@ -812,7 +812,7 @@ func _briefing_panel(head_text: String, body_text: String, head_col: Color,
 	body.offset_right = -30.0
 	panel.add_child(body)
 
-	var hint := _mk_label("PRESS ESC TO MOVE TO THE GAME", _font_pixel, 8,
+	var hint := _mk_label("PRESS ESC OR WAIT 3 SECONDS", _font_pixel, 8,
 		Color8(247, 230, 196, 160))
 	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	hint.offset_top = -38.0
@@ -828,10 +828,13 @@ func _briefing_panel(head_text: String, body_text: String, head_col: Color,
 	var tw := create_tween()
 	tw.tween_property(panel, "modulate:a", 1.0, 0.35)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	# the panel never times out: it only moves on when the player presses ESC
+	# the panel auto-dismisses after 3 seconds; ESC can dismiss it earlier
 	_briefing_wait = true
+	get_tree().create_timer(3.0).timeout.connect(
+		func() -> void: _briefing_wait = false)
 	while _briefing_wait:
 		await get_tree().process_frame
+	_briefing_wait = false
 	var out := create_tween().set_parallel()
 	out.tween_property(dim, "color:a", 0.0, 0.35)
 	out.tween_property(panel, "modulate:a", 0.0, 0.35)
@@ -1107,7 +1110,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_close_popup()
 		return
-	# a briefing panel is up: ESC dismisses it (the panel never times out)
+	# a briefing panel is up: ESC dismisses it before the 3-second timeout
 	if _briefing_wait and not _popup_box.visible and event.is_action_pressed("ui_cancel"):
 		_briefing_wait = false
 

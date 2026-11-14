@@ -221,7 +221,8 @@ func _pl(path: String) -> AudioStream:
 
 # ================================================================= tutorial ==
 ## Small "how to play" card shown the first time a level starts in a session.
-## The tree is paused until any key or the GOT IT button dismisses it.
+## The tree is paused until any key or the GOT IT button dismisses it —
+## it also auto-dismisses itself after 3 seconds.
 func show_tutorial() -> void:
 	if _tutorial_layer != null:
 		return
@@ -290,6 +291,10 @@ func show_tutorial() -> void:
 	tw.tween_property(dim, "color:a", 0.6, 0.22)
 	tw.tween_property(panel, "scale", Vector2.ONE, 0.3)\
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# the card auto-dismisses after 3 seconds (a key or GOT IT works sooner)
+	# process_always stays true so the timer fires even with the tree paused
+	get_tree().create_timer(3.0, true).timeout.connect(close_tutorial)
 
 
 func close_tutorial() -> void:
