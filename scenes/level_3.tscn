@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -16,10 +16,10 @@ size = Vector2(1152, 128)
 size = Vector2(252, 16)
 
 [sub_resource type="RectangleShape2D" id="ledge2"]
-size = Vector2(176, 16)
+size = Vector2(236, 16)
 
 [sub_resource type="RectangleShape2D" id="hop_platform"]
-size = Vector2(128, 16)
+size = Vector2(132, 16)
 
 [sub_resource type="RectangleShape2D" id="spike_kill"]
 size = Vector2(140, 140)
@@ -29,9 +29,6 @@ size = Vector2(16, 128)
 
 [sub_resource type="RectangleShape2D" id="safety_kill"]
 size = Vector2(1400, 80)
-
-[sub_resource type="RectangleShape2D" id="hill_a"]
-size = Vector2(100, 176)
 
 [sub_resource type="RectangleShape2D" id="hill_c"]
 size = Vector2(60, 176)
@@ -49,11 +46,11 @@ position = Vector2(576, 584)
 shape = SubResource("ground")
 
 [node name="Ledge1" type="CollisionShape2D" parent="World"]
-position = Vector2(262, 448)
+position = Vector2(286, 448)
 shape = SubResource("ledge")
 
 [node name="Ledge2" type="CollisionShape2D" parent="World"]
-position = Vector2(840, 448)
+position = Vector2(854, 448)
 shape = SubResource("ledge2")
 
 [node name="HopPlatform" type="CollisionShape2D" parent="World"]
@@ -67,10 +64,6 @@ shape = SubResource("border_wall")
 [node name="WallR" type="CollisionShape2D" parent="World"]
 position = Vector2(1144, 456)
 shape = SubResource("border_wall")
-
-[node name="HillA" type="CollisionShape2D" parent="World"]
-position = Vector2(390, 560)
-shape = SubResource("hill_a")
 
 [node name="HillC" type="CollisionShape2D" parent="World"]
 position = Vector2(1030, 560)
@@ -86,15 +79,15 @@ polygon = PackedVector2Array(0, 520, 1152, 520, 1152, 648, 0, 648)
 
 [node name="Ledge1Vis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(136, 440, 388, 440, 388, 456, 136, 456)
+polygon = PackedVector2Array(160, 440, 412, 440, 412, 456, 160, 456)
 
 [node name="Ledge2Vis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(752, 440, 928, 440, 928, 456, 752, 456)
+polygon = PackedVector2Array(736, 440, 972, 440, 972, 456, 736, 456)
 
 [node name="HopVis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(586, 440, 714, 440, 714, 456, 586, 456)
+polygon = PackedVector2Array(584, 440, 716, 440, 716, 456, 584, 456)
 
 [node name="WallLVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
@@ -103,14 +96,6 @@ polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 [node name="WallRVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
-
-[node name="HillAVis" type="Polygon2D" parent="."]
-color = Color(0.42, 0.3, 0.22, 1)
-polygon = PackedVector2Array(340, 472, 440, 472, 440, 648, 340, 648)
-
-[node name="HillATopVis" type="Polygon2D" parent="."]
-color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(340, 472, 440, 472, 440, 488, 340, 488)
 
 [node name="HillCVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
@@ -149,25 +134,28 @@ modulate = Color(1, 1, 1, 0)
 shape = SubResource("safety_kill")
 
 [node name="Plate1" parent="." instance=ExtResource("3_plate")]
-position = Vector2(240, 434)
+position = Vector2(264, 434)
 targets = Array[NodePath]([NodePath("../Gate1")])
 
 [node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
-position = Vector2(352, 440)
+position = Vector2(376, 440)
 
 [node name="Gate1" parent="." instance=ExtResource("5_gate")]
 position = Vector2(520, 408)
 
 [node name="Plate2" parent="." instance=ExtResource("3_plate")]
-position = Vector2(800, 434)
+position = Vector2(830, 434)
 targets = Array[NodePath]([NodePath("../Gate2")])
 
 [node name="Gate2" parent="." instance=ExtResource("5_gate")]
 position = Vector2(980, 408)
 auto_close_delay = 4.0
 
+[node name="Spikes2" parent="." instance=ExtResource("4_spikes")]
+position = Vector2(900, 440)
+
 [node name="ExitDoor" parent="." instance=ExtResource("6_door")]
-position = Vector2(1080, 494)
+position = Vector2(1112, 392)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(160, 506)

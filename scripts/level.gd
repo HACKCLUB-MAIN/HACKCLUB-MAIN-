@@ -16,6 +16,7 @@ const RING_T := 64.0        # blackstone ring thickness, logical px
 const BLOCK_PX := 32.0      # block tile size on screen (16px art upscaled 2x)
 const SHADER_CRT := "res://shaders/crt.gdshader"
 const RING_TINT := Color(0.42, 0.42, 0.48)   # extra-dark blackstone blocks
+const CAVE_THEME := preload("res://scripts/cave_theme.gd")
 
 # --- juice / animation state ---
 var _t := 0.0
@@ -28,6 +29,13 @@ var _embers: Array = []
 
 func _ready() -> void:
 	RunManager.start_recording()
+
+	# scary-cave decor (textures, vines, crystals) behind everything
+	var cave := CAVE_THEME.new()
+	cave.name = "CaveTheme"
+	add_child(cave)
+	move_child(cave, 0)
+	cave.build(self)
 
 	var ghosts_node := Node2D.new()
 	ghosts_node.name = "Ghosts"
@@ -46,6 +54,14 @@ func _ready() -> void:
 	_spawn_embers()
 	if _door != null:
 		_door_pulse()
+
+	# TEMP: verification hook, remove after testing
+	if "--shot-cave" in OS.get_cmdline_user_args():
+		await get_tree().create_timer(1.2).timeout
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(
+			"D:/Roblox/opencode/tdy/_hunt/shot_cave.png")
+		get_tree().quit()
 
 
 # ==================================================== TV + blackstone frame ==
@@ -97,7 +113,7 @@ func _add_crt_lines(layer: CanvasLayer) -> void:
 	mat.set_shader_parameter("roll_height", 0.13)
 	mat.set_shader_parameter("roll_strength", 0.06)
 	mat.set_shader_parameter("noise_strength", 0.015)
-	mat.set_shader_parameter("vignette", 0.16)
+	mat.set_shader_parameter("vignette", 0.24)
 	mat.set_shader_parameter("band_h", 0.0)
 	mat.set_shader_parameter("brightness", 1.0)
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -188,7 +204,7 @@ func _process(delta: float) -> void:
 func _spawn_embers() -> void:
 	var root := Node2D.new()
 	root.name = "Embers"
-	root.z_index = -1
+	root.z_index = 4    # float in front of the cave decor, behind the frame
 	add_child(root)
 	for i in 14:
 		var e := {}

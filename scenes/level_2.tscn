@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -49,6 +49,9 @@ size = Vector2(80, 176)
 [sub_resource type="RectangleShape2D" id="hill_d"]
 size = Vector2(88, 160)
 
+[sub_resource type="RectangleShape2D" id="lava2_kill"]
+size = Vector2(96, 80)
+
 [node name="Level2" type="Node2D"]
 script = ExtResource("1_level")
 
@@ -67,15 +70,15 @@ position = Vector2(688, 640)
 shape = SubResource("pit_floor")
 
 [node name="Step1" type="CollisionShape2D" parent="World"]
-position = Vector2(300, 472)
+position = Vector2(208, 472)
 shape = SubResource("step1")
 
 [node name="Step2" type="CollisionShape2D" parent="World"]
-position = Vector2(420, 408)
+position = Vector2(304, 408)
 shape = SubResource("step2")
 
 [node name="HighPlatform" type="CollisionShape2D" parent="World"]
-position = Vector2(500, 344)
+position = Vector2(456, 344)
 shape = SubResource("high_platform")
 
 [node name="WallL" type="CollisionShape2D" parent="World"]
@@ -116,15 +119,15 @@ polygon = PackedVector2Array(640, 632, 736, 632, 736, 648, 640, 648)
 
 [node name="Step1Vis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(252, 464, 348, 464, 348, 480, 252, 480)
+polygon = PackedVector2Array(160, 464, 256, 464, 256, 480, 160, 480)
 
 [node name="Step2Vis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(372, 400, 468, 400, 468, 416, 372, 416)
+polygon = PackedVector2Array(256, 400, 352, 400, 352, 416, 256, 416)
 
 [node name="HighVis" type="Polygon2D" parent="."]
 color = Color(0.5, 0.38, 0.27, 1)
-polygon = PackedVector2Array(396, 336, 604, 336, 604, 352, 396, 352)
+polygon = PackedVector2Array(352, 336, 560, 336, 560, 352, 352, 352)
 
 [node name="WallLVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
@@ -190,17 +193,33 @@ shape = SubResource("safety_kill")
 position = Vector2(688, 628)
 
 [node name="Plate1" parent="." instance=ExtResource("3_plate")]
-position = Vector2(460, 330)
+position = Vector2(424, 330)
 targets = Array[NodePath]([NodePath("../Gate1")])
 
 [node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
-position = Vector2(560, 336)
+position = Vector2(520, 336)
 
 [node name="Gate1" parent="." instance=ExtResource("5_gate")]
 position = Vector2(900, 408)
 
+[node name="LavaPool2" parent="." instance=ExtResource("9_lava")]
+position = Vector2(300, 518)
+width = 84.0
+depth = 30.0
+bubble_count = 4
+
+[node name="LavaKill2" parent="." instance=ExtResource("7_kill")]
+position = Vector2(300, 560)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="LavaKill2" index="0"]
+shape = SubResource("lava2_kill")
+
+[node name="Spikes2" parent="." instance=ExtResource("4_spikes")]
+position = Vector2(1050, 520)
+
 [node name="ExitDoor" parent="." instance=ExtResource("6_door")]
-position = Vector2(1040, 494)
+position = Vector2(1112, 392)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(160, 506)
