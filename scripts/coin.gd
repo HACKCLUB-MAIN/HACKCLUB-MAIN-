@@ -1,6 +1,6 @@
 extends Area2D
 ## A collectible coin. Only the player collects it (ghosts pass through).
-## Coins feed the shop wallet (GameState.add_coins) and pop with juice:
+## Coins feed the run wallet (GameState.add_coins) and pop with juice:
 ## they fake-spin and bob forever, then burst + float "+N" when grabbed.
 
 var _collected := false

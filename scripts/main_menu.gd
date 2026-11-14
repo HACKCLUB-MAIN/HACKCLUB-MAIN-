@@ -28,7 +28,6 @@ const UI_BOLTS := "res://assets/ui/panel_bolts.png"
 const ICON_SETTINGS := "res://assets/icons/settings_gear.png"
 const ICON_SOUND_ON := "res://assets/icons/volume_on.png"
 const ICON_SOUND_OFF := "res://assets/icons/volume_off.png"
-const IMG_COIN := "res://assets/game/coin.png"
 
 const SFX := {
 	hover = "res://assets/audio/switch_004.ogg",
@@ -308,7 +307,6 @@ func _build_ui() -> void:
 	_screen.add_child(_buttons_box)
 
 	_add_button("START GAME", "start", true)
-	_add_button("SHOP", "shop", false)
 	_add_button("LEVELS", "levels", false)
 	_add_button("QUIT", "quit", false)
 
@@ -599,8 +597,6 @@ func _on_action(action: String, _b: Button) -> void:
 			# each styled differently (green stroll / amber mine / red inferno)
 			_popup_open("SELECT YOUR LEVEL", "", _b,
 				[{"widget": "_fill_level_select"}])
-		"shop":
-			_popup_open("SHOP", "", _b, [{"widget": "_fill_shop"}])
 		"settings":
 			_popup_open("SETTINGS", "", _b,
 				[{"widget": "_fill_settings_widgets"}])
@@ -863,153 +859,6 @@ func _fill_settings_widgets() -> void:
 	# ---------------------------------------------------------------- danger --
 	_popup_actions.add_child(_settings_section("DANGER ZONE"))
 	_settings_reset_button()
-
-# ================================================================ shop page ==
-var _shop_refs := {}          # widgets the refresh pass updates in place
-
-func _fill_shop() -> void:
-	# ---- wallet row: coin icon + live balance ----
-	var bal := HBoxContainer.new()
-	bal.add_theme_constant_override("separation", 8)
-	bal.alignment = BoxContainer.ALIGNMENT_CENTER
-	var ic := TextureRect.new()
-	ic.texture = load(IMG_COIN)
-	ic.custom_minimum_size = Vector2(22, 22)
-	ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bal.add_child(ic)
-	_shop_refs["balance"] = _mk_label("0", _font_pixel, 14, COL_RUST,
-		COL_INK, 3)
-	bal.add_child(_shop_refs["balance"])
-	_popup_actions.add_child(bal)
-
-	# ---- skins ----
-	_popup_actions.add_child(_settings_section("SKINS"))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 7)
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	for id in GameState.SKINS:
-		row.add_child(_shop_skin_card(id))
-	_popup_actions.add_child(row)
-
-	# ---- upgrades ----
-	_popup_actions.add_child(_settings_section("UPGRADES"))
-	_shop_upgrade_row("EXTRA HEART", "+1 STARTING HEART (MAX 6)",
-		func() -> bool: return GameState.buy_heart())
-	_shop_upgrade_row("COIN DOUBLER", "EVERY COIN IS WORTH 2",
-		func() -> bool: return GameState.buy_doubler())
-	_shop_upgrade_row("SPRINT BOOTS", "RUN 15% FASTER",
-		func() -> bool: return GameState.buy_boots())
-
-	_refresh_shop()
-
-func _shop_skin_card(id: String) -> VBoxContainer:
-	var card := VBoxContainer.new()
-	card.add_theme_constant_override("separation", 3)
-	card.alignment = BoxContainer.ALIGNMENT_CENTER
-
-	var pic := TextureRect.new()
-	pic.texture = GameState.skin_frames(id)[0]
-	pic.custom_minimum_size = Vector2(40, 40)
-	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	card.add_child(pic)
-
-	var name_l := _mk_label(GameState.SKINS[id].name, _font_pixel, 8, COL_TEXT)
-	name_l.custom_minimum_size = Vector2(80, 0)
-	card.add_child(name_l)
-
-	var btn := _mk_popup_plain_button("", 9, COL_TEXT)
-	btn.custom_minimum_size = Vector2(80, 26)
-	btn.pressed.connect(func() -> void: _shop_skin_action(id))
-	card.add_child(btn)
-	_shop_refs[id] = {"btn": btn, "card": card}
-	return card
-
-func _shop_skin_action(id: String) -> void:
-	if GameState.equipped_skin == id:
-		_play("back", 0.8, -12)
-		return
-	var ok := (GameState.buy_skin(id) if not (id in GameState.owned_skins)
-		else GameState.equip_skin(id))
-	_play("confirm" if ok else "back", 1.0 if ok else 0.7, -6 if ok else -10)
-	_refresh_shop()
-
-func _shop_upgrade_row(title: String, desc: String, buy: Callable) -> void:
-	var line := HBoxContainer.new()
-	line.add_theme_constant_override("separation", 10)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var t := _mk_label(title, _font_pixel, 11, COL_TEXT)
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	col.add_child(t)
-	var d := _mk_label(desc, _font_pixel, 8, Color8(140, 110, 84))
-	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	col.add_child(d)
-	line.add_child(col)
-	var btn := _mk_popup_plain_button("", 9, COL_TEXT)
-	btn.custom_minimum_size = Vector2(112, 30)
-	btn.pressed.connect(func() -> void:
-		var ok: bool = buy.call()
-		_play("confirm" if ok else "back", 1.0 if ok else 0.7, -6 if ok else -10)
-		_refresh_shop())
-	line.add_child(btn)
-	line.set_meta("btn", btn)
-	_popup_actions.add_child(line)
-	_shop_refs[title] = line
-
-func _refresh_shop() -> void:
-	(_shop_refs["balance"] as Label).text = str(GameState.coins)
-	for id in GameState.SKINS:
-		var ref: Dictionary = _shop_refs[id]
-		var btn: Button = ref.btn
-		var price: int = GameState.SKINS[id].price
-		if GameState.equipped_skin == id:
-			btn.text = "WORN"
-			_shop_btn_tint(btn, COL_RUST)
-			ref.card.self_modulate = Color.WHITE
-		elif id in GameState.owned_skins:
-			btn.text = "EQUIP"
-			_shop_btn_tint(btn, COL_TEXT)
-			ref.card.self_modulate = Color.WHITE
-		else:
-			btn.text = "BUY - %d" % price
-			_shop_btn_tint(btn, COL_TEXT)
-			# dim the whole card until you can afford it
-			ref.card.self_modulate = (Color.WHITE if GameState.coins >= price
-				else Color(0.72, 0.68, 0.7))
-	for key in ["EXTRA HEART", "COIN DOUBLER", "SPRINT BOOTS"]:
-		var line: HBoxContainer = _shop_refs[key]
-		var btn: Button = line.get_meta("btn")
-		match key:
-			"EXTRA HEART":
-				var p := GameState.next_heart_price()
-				if p < 0:
-					btn.text = "MAXED"
-					_shop_btn_tint(btn, COL_RUST)
-				else:
-					btn.text = "BUY - %d" % p
-					_shop_btn_tint(btn, COL_TEXT)
-			"COIN DOUBLER":
-				if GameState.coin_doubler:
-					btn.text = "OWNED"
-					_shop_btn_tint(btn, COL_RUST)
-				else:
-					btn.text = "BUY - %d" % GameState.DOUBLER_PRICE
-					_shop_btn_tint(btn, COL_TEXT)
-			"SPRINT BOOTS":
-				if GameState.sprint_boots:
-					btn.text = "OWNED"
-					_shop_btn_tint(btn, COL_RUST)
-				else:
-					btn.text = "BUY - %d" % GameState.BOOTS_PRICE
-					_shop_btn_tint(btn, COL_TEXT)
-
-# tint a shop button's label (rust = worn/owned/maxed highlight)
-func _shop_btn_tint(btn: Button, col: Color) -> void:
-	for name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		btn.add_theme_color_override(name, col)
 
 func _settings_section(title: String) -> Label:
 	var l := _mk_label(title, _font_pixel, 11, COL_RUST)
@@ -1434,32 +1283,10 @@ func _play_intro() -> void:
 		await get_tree().create_timer(1.0).timeout
 		_close_popup()
 		await get_tree().create_timer(0.5).timeout
-		_popup_open("LEVELS", "", _buttons[2].btn)
+		_popup_open("LEVELS", "", _buttons[1].btn)
 		await get_tree().create_timer(1.0).timeout
 		_close_popup()
 		await get_tree().create_timer(0.5).timeout
-		# shop test: fake a wallet, open the shop, buy a skin + a heart
-		var pre_coins: int = GameState.coins
-		var pre_owned: Array = GameState.owned_skins.duplicate()
-		var pre_eq: String = GameState.equipped_skin
-		var pre_hearts: int = GameState.extra_hearts
-		GameState.coins = 200
-		_popup_open("SHOP", "", _buttons[1].btn, [{"widget": "_fill_shop"}])
-		await get_tree().create_timer(1.0).timeout
-		var ok_skin := GameState.buy_skin("ember")
-		var ok_heart := GameState.buy_heart()
-		_refresh_shop()
-		await get_tree().create_timer(0.5).timeout
-		print("AUTOTEST shop: skin=%s heart=%s coins=%d owned=%s equipped=%s hearts=%d" % [
-			ok_skin, ok_heart, GameState.coins, GameState.owned_skins,
-			GameState.equipped_skin, GameState.max_hearts()])
-		_close_popup()
-		# put the player's real wallet back (autotest money is fake)
-		GameState.coins = pre_coins
-		GameState.owned_skins = pre_owned
-		GameState.equipped_skin = pre_eq
-		GameState.extra_hearts = pre_hearts
-		GameState._save()
 		await get_tree().create_timer(0.4).timeout
 		_toggle_mute()
 		await get_tree().create_timer(0.2).timeout
