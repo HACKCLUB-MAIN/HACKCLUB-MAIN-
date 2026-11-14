@@ -229,7 +229,7 @@ position = Vector2(920, 198)
 position = Vector2(1112, 392)
 
 [node name="Player" parent="." unique_id=505593170 instance=ExtResource("2_player")]
-position = Vector2(160, 506)
+position = Vector2(120, 498)
 
 [node name="CoinStart" parent="." unique_id=1012758518 instance=ExtResource("10_coin")]
 position = Vector2(280, 468)

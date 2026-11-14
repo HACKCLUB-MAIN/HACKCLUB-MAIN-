@@ -629,10 +629,10 @@ func _launch_pulse() -> void:
 		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
-## The three difficulty boxes shown when the player presses PLAY.
+## The difficulty boxes shown when the player presses PLAY.
 ## Each box is tinted and labeled differently so the difficulty reads at a
-## glance: green stroll / amber deepslate mine / red nether inferno. Locked
-## boxes shake and stay greyed until the previous level is cleared.
+## glance: green stroll / amber deepslate mine / red nether inferno /
+## violet obsidian spire. Every level is always playable - no locks.
 func _fill_level_select() -> void:
 	var defs := [
 		{
@@ -655,6 +655,13 @@ func _fill_level_select() -> void:
 			"tint": Color(1.16, 0.62, 0.55),
 			"col": Color8(140, 28, 22),
 			"pip": Color8(204, 48, 34),
+		},
+		{
+			"n": 4, "title": "NIGHTMARE",
+			"sub": "LEVEL 4  -  OBSIDIAN SPIRE",
+			"tint": Color(1.02, 0.72, 1.22),
+			"col": Color8(84, 30, 116),
+			"pip": Color8(148, 66, 200),
 		},
 	]
 	for d in defs:
@@ -707,8 +714,8 @@ func _fill_level_select() -> void:
 		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(sub)
 
-		# filled squares = how deadly the level is (1..3)
-		for i in 3:
+		# filled squares = how deadly the level is (1..4)
+		for i in maxi(3, n):
 			var pip := ColorRect.new()
 			pip.custom_minimum_size = Vector2(9, 9)
 			pip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
