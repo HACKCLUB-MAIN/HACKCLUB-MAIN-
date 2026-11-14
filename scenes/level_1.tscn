@@ -41,6 +41,9 @@ size = Vector2(160, 16)
 [sub_resource type="RectangleShape2D" id="upper2"]
 size = Vector2(120, 16)
 
+[sub_resource type="RectangleShape2D" id="lava2_kill"]
+size = Vector2(84, 120)
+
 [node name="Level1" type="Node2D" unique_id=2012662618]
 script = ExtResource("1_level")
 
@@ -197,7 +200,10 @@ depth = 30.0
 
 [node name="LavaKill2" parent="." unique_id=1657726483 instance=ExtResource("7_kill")]
 modulate = Color(1, 1, 1, 0)
-position = Vector2(860, 560)
+position = Vector2(860, 576)
+
+[node name="Collision" parent="LavaKill2" index="0"]
+shape = SubResource("lava2_kill")
 
 [node name="Spikes2" parent="." unique_id=585761977 instance=ExtResource("4_spikes")]
 position = Vector2(1060, 520)

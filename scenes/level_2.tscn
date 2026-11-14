@@ -33,7 +33,7 @@ size = Vector2(208, 16)
 size = Vector2(16, 128)
 
 [sub_resource type="RectangleShape2D" id="spike_kill"]
-size = Vector2(80, 140)
+size = Vector2(80, 120)
 
 [sub_resource type="RectangleShape2D" id="safety_kill"]
 size = Vector2(1400, 80)
@@ -54,7 +54,7 @@ size = Vector2(88, 160)
 size = Vector2(120, 16)
 
 [sub_resource type="RectangleShape2D" id="lava2_kill"]
-size = Vector2(96, 80)
+size = Vector2(96, 120)
 
 [node name="Level2" type="Node2D"]
 script = ExtResource("1_level")
@@ -196,7 +196,7 @@ depth = 30.0
 bubble_count = 4
 
 [node name="SpikeKill" parent="." instance=ExtResource("7_kill")]
-position = Vector2(840, 560)
+position = Vector2(840, 576)
 modulate = Color(1, 1, 1, 0)
 
 [node name="Collision" parent="SpikeKill" index="0"]
@@ -229,7 +229,7 @@ depth = 30.0
 bubble_count = 4
 
 [node name="LavaKill2" parent="." instance=ExtResource("7_kill")]
-position = Vector2(300, 560)
+position = Vector2(300, 576)
 modulate = Color(1, 1, 1, 0)
 
 [node name="Collision" parent="LavaKill2" index="0"]
