@@ -49,12 +49,20 @@ func _physics_process(_d: float) -> void:
 			get_tree().quit()
 
 
-func _visual_span(s: SpriteBase2D) -> Array:
-	var r: Rect2 = s.get_rect()
+func _visual_span(s: Node2D) -> Array:
+	# AnimatedSprite2D/Sprite2D both draw their texture centered on the origin
+	var tex: Texture2D = null
+	if s is AnimatedSprite2D:
+		var frames: SpriteFrames = s.sprite_frames
+		if frames != null and frames.has_animation(s.animation):
+			tex = frames.get_frame_texture(s.animation, s.frame)
+	elif s is Sprite2D:
+		tex = s.texture
+	if tex == null:
+		return [0.0, 0.0]
+	var half := tex.get_size() / 2.0
 	var t: Transform2D = s.get_global_transform()
-	var top: Vector2 = t * r.position
-	var bottom: Vector2 = t * (r.position + Vector2(0.0, r.size.y))
-	return [top.y, bottom.y]
+	return [t * (-half), t * half]
 
 
 func _report() -> void:
