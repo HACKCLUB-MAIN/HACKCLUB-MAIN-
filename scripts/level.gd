@@ -341,7 +341,9 @@ func _spawn_embers() -> void:
 
 # the exit door breathes, so the goal draws the eye
 func _door_pulse() -> void:
-	var vis: Node2D = _door.get_node_or_null("Visual")
+	# the portal visual is a ColorRect (Control), not a Node2D — keep this
+	# untyped so it works with either kind of visual node
+	var vis = _door.get_node_or_null("Visual")
 	if vis == null:
 		return
 	var tw := create_tween().set_loops()
