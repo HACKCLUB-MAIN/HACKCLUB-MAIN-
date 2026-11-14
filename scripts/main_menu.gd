@@ -34,6 +34,11 @@ IT REPEATS YOUR EXACT MOVES, FOREVER.
 IT IS NOT YOUR ENEMY - IT IS YOUR BLUEPRINT:
 FOLLOW THE PATH THAT KEPT IT ALIVE,
 AND AVOID THE SPOT WHERE IT ENDED."""
+
+# shown after picking HARD, on top of the ghost briefing
+const SPIRE_WARNING := """I KNOW YOU MAY FEEL IT IS EASY,
+BUT IT IS NOT THAT EASY...
+EVERY STEP OF THE SPIRE WANTS YOU DEAD."""
 const ICON_SETTINGS := "res://assets/icons/settings_gear.png"
 const ICON_SOUND_ON := "res://assets/icons/volume_on.png"
 const ICON_SOUND_OFF := "res://assets/icons/volume_off.png"
@@ -738,6 +743,9 @@ func _fill_level_select() -> void:
 			await get_tree().create_timer(0.4).timeout
 			# briefing on the ghost loop while the screen is dark
 			await _ghost_briefing()
+			# the HARD box gets one extra honest warning
+			if n == 3:
+				await _hard_warning()
 			GameState.start_level(n))
 		_popup_actions.add_child(b)
 
@@ -745,6 +753,18 @@ func _fill_level_select() -> void:
 ## a short briefing on the mechanic that makes AFTER IMAGE special —
 ## dying is not the end, it is information. The ghost replays the failed run.
 func _ghost_briefing() -> void:
+	await _briefing_panel("THE GHOST OF YOUR PAST RUN", GHOST_BRIEFING,
+		COL_RUST, 10, 4.5)
+
+## HARD gets one honest warning before the dive begins.
+func _hard_warning() -> void:
+	await _briefing_panel("HARD - OBSIDIAN SPIRE", SPIRE_WARNING,
+		Color8(230, 92, 74), 12, 3.5)
+
+## Dark-screen panel shared by the pre-level briefings: head + body text,
+## held on screen for `hold` seconds, then fades out and frees itself.
+func _briefing_panel(head_text: String, body_text: String, head_col: Color,
+		body_size := 10, hold := 4.5) -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 40
 	add_child(layer)
@@ -774,14 +794,13 @@ func _ghost_briefing() -> void:
 	panel.modulate.a = 0.0
 	layer.add_child(panel)
 
-	var head := _mk_label("THE GHOST OF YOUR PAST RUN", _font_pixel, 18,
-		COL_RUST, COL_INK, 4)
+	var head := _mk_label(head_text, _font_pixel, 18, head_col, COL_INK, 4)
 	head.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	head.offset_top = 28.0
 	head.offset_bottom = 66.0
 	panel.add_child(head)
 
-	var body := _mk_label(GHOST_BRIEFING, _font_pixel, 10, COL_TEXT)
+	var body := _mk_label(body_text, _font_pixel, body_size, COL_TEXT)
 	body.set_anchors_preset(Control.PRESET_FULL_RECT)
 	body.offset_top = 72.0
 	body.offset_bottom = -46.0
@@ -799,7 +818,7 @@ func _ghost_briefing() -> void:
 	var tw := create_tween()
 	tw.tween_property(panel, "modulate:a", 1.0, 0.35)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	await get_tree().create_timer(4.5).timeout
+	await get_tree().create_timer(hold).timeout
 	var out := create_tween().set_parallel()
 	out.tween_property(dim, "color:a", 0.0, 0.35)
 	out.tween_property(panel, "modulate:a", 0.0, 0.35)
