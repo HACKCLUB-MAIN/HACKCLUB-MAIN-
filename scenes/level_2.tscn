@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -37,6 +37,18 @@ size = Vector2(80, 140)
 [sub_resource type="RectangleShape2D" id="safety_kill"]
 size = Vector2(1400, 80)
 
+[sub_resource type="RectangleShape2D" id="hill_a"]
+size = Vector2(96, 176)
+
+[sub_resource type="RectangleShape2D" id="hill_b"]
+size = Vector2(60, 176)
+
+[sub_resource type="RectangleShape2D" id="hill_c"]
+size = Vector2(80, 176)
+
+[sub_resource type="RectangleShape2D" id="hill_d"]
+size = Vector2(88, 160)
+
 [node name="Level2" type="Node2D"]
 script = ExtResource("1_level")
 
@@ -74,6 +86,22 @@ shape = SubResource("border_wall")
 position = Vector2(1144, 456)
 shape = SubResource("border_wall")
 
+[node name="HillA" type="CollisionShape2D" parent="World"]
+position = Vector2(592, 560)
+shape = SubResource("hill_a")
+
+[node name="HillB" type="CollisionShape2D" parent="World"]
+position = Vector2(766, 560)
+shape = SubResource("hill_b")
+
+[node name="HillC" type="CollisionShape2D" parent="World"]
+position = Vector2(960, 560)
+shape = SubResource("hill_c")
+
+[node name="HillD" type="CollisionShape2D" parent="World"]
+position = Vector2(44, 568)
+shape = SubResource("hill_d")
+
 [node name="GroundAVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(0, 520, 640, 520, 640, 648, 0, 648)
@@ -105,6 +133,38 @@ polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
 [node name="WallRVis" type="Polygon2D" parent="."]
 color = Color(0.42, 0.3, 0.22, 1)
 polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+
+[node name="HillAVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(544, 472, 640, 472, 640, 648, 544, 648)
+
+[node name="HillATopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(544, 472, 640, 472, 640, 488, 544, 488)
+
+[node name="HillBVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(736, 472, 796, 472, 796, 648, 736, 648)
+
+[node name="HillBTopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(736, 472, 796, 472, 796, 488, 736, 488)
+
+[node name="HillCVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(920, 472, 1000, 472, 1000, 648, 920, 648)
+
+[node name="HillCTopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(920, 472, 1000, 472, 1000, 488, 920, 488)
+
+[node name="HillDVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 488, 88, 488, 88, 648, 0, 648)
+
+[node name="HillDTopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(0, 488, 88, 488, 88, 504, 0, 504)
 
 [node name="LavaPool" parent="." instance=ExtResource("9_lava")]
 position = Vector2(840, 518)

@@ -14,6 +14,16 @@ const GLASS_F := Rect2(62.0 / 1199.0, 40.0 / 938.0, 1083.0 / 1199.0, 845.0 / 938
 const TEX_BLOCK := "res://ITCH ASSETS/Minecraft Textures/block/polished_blackstone_bricks.png"
 const RING_T := 64.0        # blackstone ring thickness, logical px
 const BLOCK_PX := 32.0      # block tile size on screen (16px art upscaled 2x)
+const SHADER_CRT := "res://shaders/crt.gdshader"
+const RING_TINT := Color(0.42, 0.42, 0.48)   # extra-dark blackstone blocks
+
+# --- juice / animation state ---
+var _t := 0.0
+var _player: Node2D = null
+var _ghost_root: Node2D = null
+var _door: Area2D = null
+var _was_on_floor := true
+var _embers: Array = []
 
 
 func _ready() -> void:
@@ -29,13 +39,13 @@ func _ready() -> void:
 
 	_build_frame()
 
-	# TEMP: verification hook, remove after testing
-	if "--shot-ring" in OS.get_cmdline_user_args():
-		await get_tree().create_timer(1.2).timeout
-		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png(
-			"D:/Roblox/opencode/tdy/_hunt/shot_ring.png")
-		get_tree().quit()
+	# --- juice hooks ---
+	_player = get_node_or_null("Player")
+	_ghost_root = get_node_or_null("Ghosts")
+	_door = get_node_or_null("ExitDoor")
+	_spawn_embers()
+	if _door != null:
+		_door_pulse()
 
 
 # ==================================================== TV + blackstone frame ==
@@ -45,6 +55,7 @@ func _build_frame() -> void:
 	add_child(layer)
 
 	_add_tv_bezel(layer)       # outermost: the homepage TV shell
+	_add_crt_lines(layer)      # old-TV scanlines over the gameplay picture
 	_add_block_ring(layer)     # inside the shell: blackstone bricks
 
 
@@ -70,6 +81,35 @@ func _add_tv_bezel(layer: CanvasLayer) -> void:
 	bezel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bezel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(bezel)
+
+
+# old-TV scanlines drawn only over the glass picture area: sits between the
+# TV shell and the blackstone ring so the ring stays crisp. Tuned light so
+# gameplay stays readable (no heavy vignette/noise like the menu's boot FX).
+func _add_crt_lines(layer: CanvasLayer) -> void:
+	var rect := ColorRect.new()
+	rect.material = ShaderMaterial.new()
+	var mat: ShaderMaterial = rect.material
+	mat.shader = load(SHADER_CRT)
+	mat.set_shader_parameter("line_spacing", 3.2)
+	mat.set_shader_parameter("line_strength", 0.15)
+	mat.set_shader_parameter("roll_speed", 0.045)
+	mat.set_shader_parameter("roll_height", 0.13)
+	mat.set_shader_parameter("roll_strength", 0.06)
+	mat.set_shader_parameter("noise_strength", 0.015)
+	mat.set_shader_parameter("vignette", 0.16)
+	mat.set_shader_parameter("band_h", 0.0)
+	mat.set_shader_parameter("brightness", 1.0)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rect.anchor_left = GLASS_F.position.x
+	rect.anchor_top = GLASS_F.position.y
+	rect.anchor_right = GLASS_F.position.x + GLASS_F.size.x
+	rect.anchor_bottom = GLASS_F.position.y + GLASS_F.size.y
+	rect.offset_left = -4.0
+	rect.offset_right = 4.0
+	rect.offset_top = -4.0
+	rect.offset_bottom = 4.0
+	layer.add_child(rect)
 
 
 # ring of Minecraft blackstone bricks hugging the inside of the TV shell.
@@ -113,4 +153,95 @@ func _ring_strip(layer: CanvasLayer, tex: Texture2D,
 	tr.offset_right = orr
 	tr.offset_top = ot
 	tr.offset_bottom = ob
+	tr.self_modulate = RING_TINT   # extra-dark blackstone blocks
 	layer.add_child(tr)
+
+
+# ======================================================== juice / animations ==
+func _process(delta: float) -> void:
+	_t += delta
+
+	# embers drift upward and sway
+	for e in _embers:
+		e.sp += Vector2(sin(_t * e.sw + e.ph) * 12.0, -e.rise) * delta
+		e.node.position = e.sp
+		if e.node.position.y < 60.0:            # floated past the glass top
+			e.sp = Vector2(randf_range(160.0, 1120.0), randf_range(600.0, 660.0))
+		e.node.modulate.a = 0.35 + 0.25 * sin(_t * 2.0 + e.ph)
+
+	# landing / take-off squash & stretch (visual only, physics untouched)
+	if _player != null:
+		var on_floor: bool = _player.is_on_floor()
+		if on_floor and not _was_on_floor:
+			_squash(1.28, 0.72)                 # landed: wide + flat
+			_dust_puff(_player.position)
+		elif not on_floor and _was_on_floor and _player.velocity.y < -50.0:
+			_squash(0.74, 1.26)                 # jumped: slim + tall
+		_was_on_floor = on_floor
+
+	# ghost clone flickers like an old TV rerun
+	if _ghost_root != null:
+		_ghost_root.modulate.a = 0.62 + 0.10 * sin(_t * 7.3) * sin(_t * 3.1)
+
+
+# warm embers floating up through the whole picture, behind the game
+func _spawn_embers() -> void:
+	var root := Node2D.new()
+	root.name = "Embers"
+	root.z_index = -1
+	add_child(root)
+	for i in 14:
+		var e := {}
+		e.node = ColorRect.new()
+		var s := randf_range(2.0, 4.0)
+		(e.node as ColorRect).size = Vector2(s, s)
+		(e.node as ColorRect).color = Color(1.0, 0.72, 0.35, 0.5)
+		e.node.position = Vector2(randf_range(160.0, 1120.0), randf_range(80.0, 660.0))
+		root.add_child(e.node)
+		e.rise = randf_range(18.0, 42.0)
+		e.sw = randf_range(1.2, 2.8)
+		e.ph = randf_range(0.0, TAU)
+		e.sp = e.node.position
+		_embers.append(e)
+
+
+# the exit door breathes, so the goal draws the eye
+func _door_pulse() -> void:
+	var vis: Node2D = _door.get_node_or_null("Visual")
+	if vis == null:
+		return
+	var tw := create_tween().set_loops()
+	tw.tween_property(vis, "self_modulate", Color(1.45, 1.45, 1.15), 0.7)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(vis, "self_modulate", Color(0.9, 0.9, 0.9), 0.7)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+# squash/stretch the player's Visual child only (x-scale, y-scale -> normal)
+func _squash(sx: float, sy: float) -> void:
+	var vis: Node2D = _player.get_node_or_null("Visual")
+	if vis == null:
+		return
+	vis.scale = Vector2(sx, sy)
+	var tw := create_tween()
+	tw.tween_property(vis, "scale", Vector2.ONE, 0.22)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+# small dust puff when the cat lands
+func _dust_puff(at: Vector2) -> void:
+	for i in 5:
+		var d := ColorRect.new()
+		var s := randf_range(2.5, 4.5)
+		d.size = Vector2(s, s)
+		d.color = Color(0.85, 0.78, 0.62, 0.55)
+		d.position = at + Vector2(randf_range(-14.0, 14.0), 14.0)
+		d.z_index = 5
+		add_child(d)
+		var dx := randf_range(-34.0, 34.0)
+		var dy := randf_range(-20.0, -6.0)
+		var tw := create_tween().set_parallel()
+		tw.tween_property(d, "position", d.position + Vector2(dx, dy), 0.4)\
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(d, "color:a", 0.0, 0.4)
+		tw.chain().tween_callback(d.queue_free)
