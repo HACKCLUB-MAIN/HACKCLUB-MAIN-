@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://bi2lgtm20l1sg"]
+[gd_scene format=3 uid="uid://bi2lgtm20l1sg"]
 
 [ext_resource type="Script" uid="uid://bgn3e1m8uty74" path="res://scripts/ghost.gd" id="1_ghost"]
 [ext_resource type="Texture2D" uid="uid://ccuw27u077l0s" path="res://assets/Ghost and Skull sprites/Ghost and Skull sprites/ghostSpritesheetfull.png" id="2_sheet"]

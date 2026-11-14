@@ -1,0 +1,136 @@
+[gd_scene format=3 uid="uid://ua6800gpc60s"]
+
+[ext_resource type="Script" uid="uid://5g04xdcxflkn" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://cqurcqpb5m6di" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://3fqru24hm7oq" path="res://scenes/exit_door.tscn" id="3_door"]
+[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="4_kill"]
+[ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="5_lava"]
+[ext_resource type="PackedScene" path="res://scenes/coin.tscn" id="6_coin"]
+
+[sub_resource type="RectangleShape2D" id="ground_a"]
+size = Vector2(512, 128)
+
+[sub_resource type="RectangleShape2D" id="tower"]
+size = Vector2(176, 184)
+
+[sub_resource type="RectangleShape2D" id="plateau"]
+size = Vector2(384, 288)
+
+[sub_resource type="RectangleShape2D" id="mid_ledge"]
+size = Vector2(160, 16)
+
+[sub_resource type="RectangleShape2D" id="border_wall"]
+size = Vector2(16, 128)
+
+[sub_resource type="RectangleShape2D" id="wall_r"]
+size = Vector2(16, 416)
+
+[sub_resource type="RectangleShape2D" id="pit_floor"]
+size = Vector2(80, 16)
+
+[node name="Level4" type="Node2D" unique_id=2012221433]
+script = ExtResource("1_level")
+
+[node name="World" type="StaticBody2D" parent="." unique_id=363209503]
+
+[node name="GroundA" type="CollisionShape2D" parent="World" unique_id=2122427239]
+position = Vector2(256, 584)
+shape = SubResource("ground_a")
+
+[node name="Tower" type="CollisionShape2D" parent="World" unique_id=520674713]
+position = Vector2(680, 556)
+shape = SubResource("tower")
+
+[node name="Plateau" type="CollisionShape2D" parent="World" unique_id=1080521573]
+position = Vector2(960, 504)
+shape = SubResource("plateau")
+
+[node name="MidLedge" type="CollisionShape2D" parent="World" unique_id=2008983759]
+position = Vector2(496, 464)
+shape = SubResource("mid_ledge")
+
+[node name="WallL" type="CollisionShape2D" parent="World" unique_id=905479441]
+position = Vector2(8, 456)
+shape = SubResource("border_wall")
+
+[node name="WallR" type="CollisionShape2D" parent="World" unique_id=429542559]
+position = Vector2(1144, 440)
+shape = SubResource("wall_r")
+
+[node name="PitFloor" type="CollisionShape2D" parent="World" unique_id=104724407]
+position = Vector2(552, 640)
+shape = SubResource("pit_floor")
+
+[node name="GroundAVis" type="Polygon2D" parent="." unique_id=655512500]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 520, 512, 520, 512, 648, 0, 648)
+
+[node name="PitFloorVis" type="Polygon2D" parent="." unique_id=965718552]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(512, 556, 592, 556, 592, 648, 512, 648)
+
+[node name="MidLedgeVis" type="Polygon2D" parent="." unique_id=771436272]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(416, 456, 576, 456, 576, 472, 416, 472)
+
+[node name="TowerVis" type="Polygon2D" parent="." unique_id=1755489126]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(592, 464, 768, 464, 768, 648, 592, 648)
+
+[node name="TowerTopVis" type="Polygon2D" parent="." unique_id=384374311]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(592, 464, 768, 464, 768, 480, 592, 480)
+
+[node name="PlateauVis" type="Polygon2D" parent="." unique_id=1525194337]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(768, 360, 1152, 360, 1152, 648, 768, 648)
+
+[node name="PlateauTopVis" type="Polygon2D" parent="." unique_id=993179674]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(768, 360, 1152, 360, 1152, 376, 768, 376)
+
+[node name="WallLVis" type="Polygon2D" parent="." unique_id=1482815017]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
+
+[node name="WallRVis" type="Polygon2D" parent="." unique_id=1471367267]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(1136, 232, 1152, 232, 1152, 648, 1136, 648)
+
+[node name="LavaPit" parent="." unique_id=563080845 instance=ExtResource("5_lava")]
+position = Vector2(552, 518)
+width = 88.0
+depth = 40.0
+
+[node name="PitKill" parent="." unique_id=887477228 instance=ExtResource("4_kill")]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(552, 560)
+
+[node name="LavaTower" parent="." unique_id=1825745262 instance=ExtResource("5_lava")]
+position = Vector2(748, 464)
+width = 40.0
+depth = 20.0
+bubble_count = 2
+
+[node name="TowerKill" parent="." unique_id=940130621 instance=ExtResource("4_kill")]
+modulate = Color(1, 1, 1, 0)
+position = Vector2(748, 466)
+scale = Vector2(0.3125, 1)
+
+[node name="ExitDoor" parent="." unique_id=1783633795 instance=ExtResource("3_door")]
+position = Vector2(1080, 296)
+
+[node name="Player" parent="." unique_id=1785606794 instance=ExtResource("2_player")]
+position = Vector2(160, 498)
+
+[node name="CoinMid" parent="." unique_id=496984108 instance=ExtResource("6_coin")]
+position = Vector2(496, 416)
+
+[node name="CoinTower" parent="." unique_id=37527087 instance=ExtResource("6_coin")]
+position = Vector2(640, 424)
+
+[node name="CoinPlateauA" parent="." unique_id=447773825 instance=ExtResource("6_coin")]
+position = Vector2(900, 320)
+
+[node name="CoinPlateauB" parent="." unique_id=1842155365 instance=ExtResource("6_coin")]
+position = Vector2(1000, 320)
