@@ -23,8 +23,15 @@ var _player: Node2D = null
 var _ghost_root: Node2D = null
 var _door: Area2D = null
 var _was_on_floor := true
+var _prev_fall := 0.0
 var _embers: Array = []
 var _squash_tween: Tween = null
+var _coin_label: Label = null
+var _fps_label: Label = null
+var _fps_timer := 0.0
+
+const FONT_HUD := "res://assets/fonts/PressStart2P-Regular.ttf"
+const TEX_COIN := "res://assets/game/coin.png"
 
 
 func _ready() -> void:
@@ -63,6 +70,12 @@ func _ready() -> void:
 	_spawn_embers()
 	if _door != null:
 		_door_pulse()
+
+	# --- juice autoload integration ---
+	Juice.on_level_start()      # clear death/pause state from the previous scene
+	Juice.shake_register(self)  # the level root is what screen shake moves
+	_build_hud()
+	_spawn_pop()
 
 	# TEMP: verification hook, remove after testing
 	if "--shot-cave" in OS.get_cmdline_user_args():
@@ -270,13 +283,23 @@ func _process(delta: float) -> void:
 		if on_floor and not _was_on_floor:
 			_squash(1.28, 0.72)                 # landed: wide + flat
 			_dust_puff(_player.position)
+			if _prev_fall > 380.0:
+				_dust_puff(_player.position)    # extra dust on a hard landing
 		elif not on_floor and _was_on_floor and _player.velocity.y < -50.0:
 			_squash(0.74, 1.26)                 # jumped: slim + tall
+		_prev_fall = _player.velocity.y if not on_floor else 0.0
 		_was_on_floor = on_floor
 
 	# ghost clone flickers like an old TV rerun
 	if _ghost_root != null:
 		_ghost_root.modulate.a = 0.62 + 0.10 * sin(_t * 7.3) * sin(_t * 3.1)
+
+	# optional FPS counter
+	if _fps_label != null:
+		_fps_timer += delta
+		if _fps_timer >= 0.4:
+			_fps_label.text = "%d FPS" % Engine.get_frames_per_second()
+			_fps_timer = 0.0
 
 
 # warm embers floating up through the whole picture, behind the game
@@ -349,3 +372,107 @@ func _dust_puff(at: Vector2) -> void:
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tw.tween_property(d, "color:a", 0.0, 0.4)
 		tw.chain().tween_callback(d.queue_free)
+
+
+# ================================================================== the HUD ==
+# Screen-space overlay (CanvasLayer, so it stays still while the world shakes):
+# coins top-left, level top-center, deaths top-right — all sliding in at start.
+
+func _build_hud() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "HUD"
+	layer.layer = 15
+	add_child(layer)
+
+	var font: Font = load(FONT_HUD)
+
+	# --- coin counter ---
+	var coin_box := HBoxContainer.new()
+	coin_box.position = Vector2(18.0, 12.0)
+	coin_box.add_theme_constant_override("separation", 8)
+	layer.add_child(coin_box)
+	var coin_icon := TextureRect.new()
+	coin_icon.texture = load(TEX_COIN)
+	coin_icon.custom_minimum_size = Vector2(26.0, 26.0)
+	coin_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	coin_box.add_child(coin_icon)
+	_coin_label = _hud_label(str(GameState.coins), 18, Color(1.0, 0.9, 0.45), font)
+	coin_box.add_child(_coin_label)
+	GameState.coins_changed.connect(_on_coins_changed)
+
+	# --- level tag, top-center ---
+	var level_label := _hud_label("LEVEL %d/%d" % [RunManager.level_index + 1, RunManager.LEVELS.size()],
+		12, Color(0.92, 0.88, 0.78), font)
+	layer.add_child(level_label)
+
+	# --- death counter, top-right ---
+	var death_label := _hud_label("DEATHS %d" % GameState.deaths, 12, Color(0.95, 0.55, 0.5), font)
+	layer.add_child(death_label)
+
+	# --- optional FPS counter, bottom-right ---
+	if GameState.show_fps:
+		_fps_label = _hud_label("", 10, Color(0.7, 0.85, 0.7), font)
+		layer.add_child(_fps_label)
+
+	# one frame later the font metrics are known: pin centered / right-aligned
+	await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	var vs := get_viewport_rect().size
+	level_label.position = Vector2(vs.x / 2.0 - level_label.size.x / 2.0, 14.0)
+	death_label.position = Vector2(vs.x - death_label.size.x - 18.0, 16.0)
+	if _fps_label != null:
+		_fps_label.position = Vector2(vs.x - _fps_label.size.x - 12.0, vs.y - _fps_label.size.y - 10.0)
+
+	# everything drops in from above
+	for ctrl in layer.get_children():
+		if ctrl is Control:
+			var target: float = (ctrl as Control).position.y
+			(ctrl as Control).position.y -= 36.0
+			(ctrl as Control).modulate.a = 0.0
+			var tw := create_tween().set_parallel()
+			tw.tween_property(ctrl, "position:y", target, 0.5)\
+				.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tw.tween_property(ctrl, "modulate:a", 1.0, 0.3)
+
+
+func _hud_label(text: String, size: int, color: Color, font: Font) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_override("font", font)
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.1))
+	l.add_theme_constant_override("outline_size", 4)
+	return l
+
+
+func _on_coins_changed(total: int) -> void:
+	if _coin_label == null:
+		return
+	_coin_label.text = str(total)
+	# pop the number when it changes
+	_coin_label.pivot_offset = _coin_label.size / 2.0
+	var tw := create_tween()
+	tw.tween_property(_coin_label, "scale", Vector2(1.35, 1.35), 0.08)\
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_coin_label, "scale", Vector2.ONE, 0.22)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+# the cat materializes at the spawn with a pop and a puff of dust
+func _spawn_pop() -> void:
+	if _player == null:
+		return
+	var vis: Node2D = _player.get_node_or_null("Visual")
+	if vis == null:
+		return
+	if not vis.has_meta("base_scale"):
+		vis.set_meta("base_scale", vis.scale)
+	var base: Vector2 = vis.get_meta("base_scale")
+	vis.scale = base * Vector2(0.05, 0.05)
+	var tw := vis.create_tween()
+	tw.tween_property(vis, "scale", base, 0.4)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	Juice.puff(_player.global_position + Vector2(0.0, 10.0), Color(0.8, 0.85, 0.95, 0.5), 6)
+	Juice.play("spawn", 1.0, -10.0)

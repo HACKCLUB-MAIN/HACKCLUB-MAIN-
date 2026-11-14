@@ -25,7 +25,6 @@ const UI_PANEL_PRESSED := "res://assets/ui/panel_cream_pressed.png"
 const UI_BANNER := "res://assets/ui/banner_red.png"
 const UI_BANNER_PRESSED := "res://assets/ui/banner_red_pressed.png"
 const UI_BOLTS := "res://assets/ui/panel_bolts.png"
-
 const ICON_SETTINGS := "res://assets/icons/settings_gear.png"
 const ICON_SOUND_ON := "res://assets/icons/volume_on.png"
 const ICON_SOUND_OFF := "res://assets/icons/volume_off.png"

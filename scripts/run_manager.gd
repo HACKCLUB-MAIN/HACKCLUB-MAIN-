@@ -64,7 +64,8 @@ func _add_key_action(action: String, keys: Array) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
-		restart_level(true)  # R = wipe the ghost, restart level from scratch
+		if not Juice.death_pending:
+			restart_level(true)  # R = wipe the ghost, restart level from scratch
 	elif event.is_action_pressed("skip_level"):
 		level_complete()  # N = debug shortcut to the next level
 
@@ -113,9 +114,15 @@ func restart_level(clear_ghost := false) -> void:
 
 
 func level_complete() -> void:
+	if Juice.death_pending:
+		return
+	# persist progress: the NEXT level becomes playable from the menu
+	GameState.complete_level(level_index + 1)
 	ghost_data = {}
 	recording = false
+	if level_index + 1 >= LEVELS.size():
+		level_index = 0
+		Juice.show_win()   # all levels cleared: celebration screen
+		return
 	level_index += 1
-	if level_index >= LEVELS.size():
-		level_index = 0  # TODO: replace with a proper win screen
 	get_tree().change_scene_to_file(LEVELS[level_index])
