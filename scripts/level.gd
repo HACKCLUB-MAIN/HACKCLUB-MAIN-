@@ -54,6 +54,7 @@ func _ready() -> void:
 		ghost.setup(RunManager.ghost_data)
 
 	_build_frame()
+	_block_curtain()
 
 	# --- juice hooks ---
 	_player = get_node_or_null("Player")
@@ -65,7 +66,7 @@ func _ready() -> void:
 
 	# TEMP: verification hook, remove after testing
 	if "--shot-cave" in OS.get_cmdline_user_args():
-		await get_tree().create_timer(1.2).timeout
+		await get_tree().create_timer(2.2).timeout
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png(
 			"D:/Roblox/opencode/tdy/_hunt/shot_cave.png")
@@ -170,6 +171,64 @@ func _build_frame() -> void:
 	add_child(layer)
 
 	_add_crt_lines(layer)      # old-TV scanlines over the gameplay picture
+
+
+# ===================================================== block curtain intro ==
+# The level opens covered by the same full-page blackstone wall as the
+# homepage (same textures, mixture, seed and tint - so pressing START is a
+# seamless cut from the menu wall to this one). Its blocks then fall away
+# gradually from the top, and the game is revealed behind them as they drop.
+
+const WALL_TINT := Color(0.45, 0.45, 0.52)   # matches the homepage wall
+const WALL_SEED := 20261114                  # matches the homepage wall
+
+func _block_curtain() -> void:
+	var vs := get_viewport_rect().size
+	var layer := CanvasLayer.new()
+	layer.layer = 30            # above the CRT/scanline layer
+	add_child(layer)
+	var wall := Node2D.new()
+	wall.name = "BlockCurtain"
+	layer.add_child(wall)
+
+	var base := _block_tex_32(TEX_BLOCK)
+	var cracked := _block_tex_32(TEX_BLOCK_CRACKED)
+	var gilded := _block_tex_32(TEX_BLOCK_GILDED)
+	var cols := int(ceilf(vs.x / BLOCK_PX))
+	var rows := int(ceilf(vs.y / BLOCK_PX))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = WALL_SEED
+
+	var last_finish := 0.0
+	for cy in rows:
+		for cx in cols:
+			var spr := Sprite2D.new()
+			var roll := rng.randf()
+			if roll < MIX_GILDED:
+				spr.texture = gilded
+			elif roll < MIX_CRACKED + MIX_GILDED:
+				spr.texture = cracked
+			else:
+				spr.texture = base
+			spr.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			spr.centered = false
+			spr.position = Vector2(cx, cy) * BLOCK_PX
+			spr.self_modulate = WALL_TINT
+			wall.add_child(spr)
+
+			# top rows start falling first, columns stagger left to right
+			# with a little noise; gravity-style acceleration (ease IN)
+			var delay := cx * 0.012 + cy * 0.012 + rng.randf() * 0.05
+			var dur := 0.55 + rng.randf() * 0.25
+			last_finish = maxf(last_finish, delay + dur)
+			var tw := create_tween()
+			tw.tween_interval(delay)
+			tw.tween_property(spr, "position:y", vs.y + BLOCK_PX * 2.0, dur)\
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+	var done := create_tween()
+	done.tween_interval(last_finish + 0.05)
+	done.tween_callback(layer.queue_free)
 
 
 # old-TV scanlines drawn over the whole gameplay picture (full screen).

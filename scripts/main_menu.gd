@@ -62,9 +62,9 @@ const TEX_STONE := "res://ITCH ASSETS/Minecraft Textures/block/polished_blacksto
 const TEX_STONE_CRACKED := "res://ITCH ASSETS/Minecraft Textures/block/cracked_polished_blackstone_bricks.png"
 const TEX_STONE_GILDED := "res://ITCH ASSETS/Minecraft Textures/block/gilded_blackstone.png"
 const STONE_PX := 32.0
-const GROUND_F := 0.16          # ground strip height as a share of the glass
 const GROUND_MIX_CRACKED := 0.22
 const GROUND_MIX_GILDED := 0.10
+const COL_WALL := Color(0.45, 0.45, 0.52)   # extra-dark tint so the UI pops
 const COL_CREAM := Color8(247, 230, 196)
 const COL_INK := Color8(56, 42, 30)
 const COL_TEXT := Color8(86, 62, 40)
@@ -597,9 +597,23 @@ func _on_action(action: String, _b: Button) -> void:
 		"start":
 			_busy = true
 			_play("confirm", 1.0, -4)
-			# seamless hand-off: the TV shell is drawn identically in the
-			# menu and in the game, so the game simply starts inside the
-			# same frame - no black screen in between
+			# launch beat: zoom pulse, UI/clouds fade out, the block wall
+			# flashes bright - then the level opens with the SAME wall
+			# covering it (same seed/tint), and its blocks fall away from
+			# the top to reveal the game (see level.gd _block_curtain)
+			_launch_pulse()
+			var out := create_tween()
+			out.set_parallel(true)
+			out.tween_property(_ground_root, "self_modulate",
+				Color(1.0, 1.0, 1.05), 0.16)
+			out.tween_property(_cloud_root, "modulate:a", 0.0, 0.25)
+			out.tween_property(_title_node, "modulate:a", 0.0, 0.3)
+			out.tween_property(_sub_label, "modulate:a", 0.0, 0.3)
+			out.tween_property(_buttons_box, "modulate:a", 0.0, 0.25)
+			out.tween_property(_year_label, "modulate:a", 0.0, 0.3)
+			out.tween_property(_icon_row, "modulate:a", 0.0, 0.25)
+			out.tween_property(_footer, "modulate:a", 0.0, 0.3)
+			await get_tree().create_timer(0.4).timeout
 			GameState.start_level(1)
 		"shop":
 			_popup_open("SHOP", "", _b, [{"widget": "_fill_shop"}])
@@ -1054,7 +1068,9 @@ func _stone_tex(path: String) -> Texture2D:
 	return ImageTexture.create_from_image(img)
 
 
-# rebuild the homepage ground strip whenever the glass size changes
+# rebuild the homepage block wall whenever the page size changes.
+# The wall covers the WHOLE page - same block mixture and seed as the
+# in-game terrain and the level-start curtain, so START hands off seamlessly.
 func _update_ground() -> void:
 	if _ground_root == null:
 		return
@@ -1065,7 +1081,6 @@ func _update_ground() -> void:
 	for c in _ground_root.get_children():
 		(c as Node).queue_free()
 
-	var gh := maxf(sz.y * GROUND_F, STONE_PX)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 20261114   # fixed mixture, same every launch
 
@@ -1074,13 +1089,13 @@ func _update_ground() -> void:
 	slab.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	slab.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	slab.region_enabled = true
-	slab.region_rect = Rect2(Vector2.ZERO, Vector2(sz.x, gh))
+	slab.region_rect = Rect2(Vector2.ZERO, sz)
 	slab.centered = false
-	slab.position = Vector2(0, sz.y - gh)
+	slab.self_modulate = COL_WALL
 	_ground_root.add_child(slab)
 
 	var cols := int(ceilf(sz.x / STONE_PX))
-	var rows := int(floorf(gh / STONE_PX))
+	var rows := int(ceilf(sz.y / STONE_PX))
 	for cy in rows:
 		for cx in cols:
 			var roll := rng.randf()
@@ -1090,7 +1105,8 @@ func _update_ground() -> void:
 			acc.texture = _stone_gilded if roll < GROUND_MIX_GILDED else _stone_cracked
 			acc.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			acc.centered = false
-			acc.position = Vector2(cx, cy) * STONE_PX + Vector2(0, sz.y - gh)
+			acc.self_modulate = COL_WALL
+			acc.position = Vector2(cx, cy) * STONE_PX
 			_ground_root.add_child(acc)
 
 
