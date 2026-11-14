@@ -25,6 +25,15 @@ const UI_PANEL_PRESSED := "res://assets/ui/panel_cream_pressed.png"
 const UI_BANNER := "res://assets/ui/banner_red.png"
 const UI_BANNER_PRESSED := "res://assets/ui/banner_red_pressed.png"
 const UI_BOLTS := "res://assets/ui/panel_bolts.png"
+
+# shown after picking a difficulty: teaches the ghost loop in one glance
+const GHOST_BRIEFING := """EVERY TIME YOU DIE, THE RUN YOU JUST PLAYED
+COMES BACK AS A GHOST.
+IT REPEATS YOUR EXACT MOVES, FOREVER.
+
+IT IS NOT YOUR ENEMY - IT IS YOUR BLUEPRINT:
+FOLLOW THE PATH THAT KEPT IT ALIVE,
+AND AVOID THE SPOT WHERE IT ENDED."""
 const ICON_SETTINGS := "res://assets/icons/settings_gear.png"
 const ICON_SOUND_ON := "res://assets/icons/volume_on.png"
 const ICON_SOUND_OFF := "res://assets/icons/volume_off.png"
@@ -650,7 +659,6 @@ func _fill_level_select() -> void:
 	]
 	for d in defs:
 		var n: int = d.n
-		var locked := not GameState.is_level_unlocked(n)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(0, 62)
 		var sb_n := _mk_stylebox(load(UI_PANEL), 10)
@@ -695,10 +703,7 @@ func _fill_level_select() -> void:
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		inner.add_child(row)
 
-		var sub_text: String = d.sub if not locked \
-			else "LOCKED  -  CLEAR THE LEVEL BEFORE"
-		var sub := _mk_label(sub_text, _font_pixel, 7,
-			d.col if not locked else Color8(96, 88, 80))
+		var sub := _mk_label(d.sub, _font_pixel, 7, d.col)
 		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(sub)
 
@@ -711,38 +716,95 @@ func _fill_level_select() -> void:
 			pip.color = (d.pip as Color) if i < n else Color(0.25, 0.2, 0.16, 0.35)
 			row.add_child(pip)
 
-		if locked:
-			b.self_modulate = Color(0.6, 0.6, 0.64)
-			b.pressed.connect(func() -> void:
-				_play("back", 0.7, -8)
-				var tw := create_tween()
-				var x0 := b.position.x
-				tw.tween_property(b, "position:x", x0 + 6.0, 0.05)
-				tw.tween_property(b, "position:x", x0 - 6.0, 0.05)
-				tw.tween_property(b, "position:x", x0, 0.05))
-		else:
-			b.button_down.connect(func() -> void: _play("click", 1.0, -6))
-			b.pressed.connect(func() -> void:
-				_close_popup()
-				_busy = true
-				_play("confirm", 1.0, -4)
-				# launch beat: the block wall flashes bright, then the level
-				# opens covered by the SAME wall (see level.gd _block_curtain)
-				_launch_pulse()
-				var out := create_tween()
-				out.set_parallel(true)
-				out.tween_property(_ground_root, "self_modulate",
-					Color(1.0, 1.0, 1.05), 0.16)
-				out.tween_property(_cloud_root, "modulate:a", 0.0, 0.25)
-				out.tween_property(_title_node, "modulate:a", 0.0, 0.3)
-				out.tween_property(_sub_label, "modulate:a", 0.0, 0.3)
-				out.tween_property(_buttons_box, "modulate:a", 0.0, 0.25)
-				out.tween_property(_year_label, "modulate:a", 0.0, 0.3)
-				out.tween_property(_icon_row, "modulate:a", 0.0, 0.25)
-				out.tween_property(_footer, "modulate:a", 0.0, 0.3)
-				await get_tree().create_timer(0.4).timeout
-				GameState.start_level(n))
+		b.button_down.connect(func() -> void: _play("click", 1.0, -6))
+		b.pressed.connect(func() -> void:
+			_close_popup()
+			_busy = true
+			_play("confirm", 1.0, -4)
+			# launch beat: the block wall flashes bright, then the level
+			# opens covered by the SAME wall (see level.gd _block_curtain)
+			_launch_pulse()
+			var out := create_tween()
+			out.set_parallel(true)
+			out.tween_property(_ground_root, "self_modulate",
+				Color(1.0, 1.0, 1.05), 0.16)
+			out.tween_property(_cloud_root, "modulate:a", 0.0, 0.25)
+			out.tween_property(_title_node, "modulate:a", 0.0, 0.3)
+			out.tween_property(_sub_label, "modulate:a", 0.0, 0.3)
+			out.tween_property(_buttons_box, "modulate:a", 0.0, 0.25)
+			out.tween_property(_year_label, "modulate:a", 0.0, 0.3)
+			out.tween_property(_icon_row, "modulate:a", 0.0, 0.25)
+			out.tween_property(_footer, "modulate:a", 0.0, 0.3)
+			await get_tree().create_timer(0.4).timeout
+			# briefing on the ghost loop while the screen is dark
+			await _ghost_briefing()
+			GameState.start_level(n))
 		_popup_actions.add_child(b)
+
+## Shown while the screen is still dark, right after a difficulty is picked:
+## a short briefing on the mechanic that makes AFTER IMAGE special —
+## dying is not the end, it is information. The ghost replays the failed run.
+func _ghost_briefing() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 40
+	add_child(layer)
+
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.01, 0.02, 0.0)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP   # block clicks while up
+	layer.add_child(dim)
+	create_tween().tween_property(dim, "color:a", 0.78, 0.3)
+
+	var panel := NinePatchRect.new()
+	panel.texture = load(UI_BOLTS)
+	panel.patch_margin_left = 12
+	panel.patch_margin_top = 12
+	panel.patch_margin_right = 12
+	panel.patch_margin_bottom = 12
+	panel.anchor_left = 0.5
+	panel.anchor_right = 0.5
+	panel.anchor_top = 0.5
+	panel.anchor_bottom = 0.5
+	panel.offset_left = -330
+	panel.offset_right = 330
+	panel.offset_top = -158
+	panel.offset_bottom = 158
+	panel.pivot_offset = Vector2(330, 158)
+	panel.modulate.a = 0.0
+	layer.add_child(panel)
+
+	var head := _mk_label("THE GHOST OF YOUR PAST RUN", _font_pixel, 18,
+		COL_RUST, COL_INK, 4)
+	head.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	head.offset_top = 28.0
+	head.offset_bottom = 66.0
+	panel.add_child(head)
+
+	var body := _mk_label(GHOST_BRIEFING, _font_pixel, 10, COL_TEXT)
+	body.set_anchors_preset(Control.PRESET_FULL_RECT)
+	body.offset_top = 72.0
+	body.offset_bottom = -46.0
+	body.offset_left = 30.0
+	body.offset_right = -30.0
+	panel.add_child(body)
+
+	var hint := _mk_label("GET READY...", _font_pixel, 8,
+		Color8(247, 230, 196, 160))
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_top = -38.0
+	hint.offset_bottom = -16.0
+	panel.add_child(hint)
+
+	var tw := create_tween()
+	tw.tween_property(panel, "modulate:a", 1.0, 0.35)\
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	await get_tree().create_timer(4.5).timeout
+	var out := create_tween().set_parallel()
+	out.tween_property(dim, "color:a", 0.0, 0.35)
+	out.tween_property(panel, "modulate:a", 0.0, 0.35)
+	await out.finished
+	layer.queue_free()
 
 func _quit_game() -> void:
 	_busy = true
