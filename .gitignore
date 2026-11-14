@@ -1,6 +1,11 @@
 # Godot 4 generated cache
 .godot/
 
+# local build outputs - shipped to itch.io with butler, never tracked
+build/
+test_*.gd
+test_*.gd.uid
+
 # local-only junk - keep on disk, never track
 repo/
 new-game-project/
