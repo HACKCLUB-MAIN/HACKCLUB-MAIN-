@@ -12,6 +12,8 @@ const GHOST_SCENE := preload("res://scenes/ghost.tscn")
 const IMG_TV := "res://assets/images/tv_screen.png"
 const GLASS_F := Rect2(62.0 / 1199.0, 40.0 / 938.0, 1083.0 / 1199.0, 845.0 / 938.0)
 const TEX_BLOCK := "res://ITCH ASSETS/Minecraft Textures/block/polished_blackstone_bricks.png"
+const TEX_BLOCK_CRACKED := "res://ITCH ASSETS/Minecraft Textures/block/cracked_polished_blackstone_bricks.png"
+const TEX_BLOCK_GILDED := "res://ITCH ASSETS/Minecraft Textures/block/gilded_blackstone.png"
 const RING_T := 64.0        # blackstone ring thickness, logical px
 const BLOCK_PX := 32.0      # block tile size on screen (16px art upscaled 2x)
 const SHADER_CRT := "res://shaders/crt.gdshader"
@@ -38,6 +40,9 @@ func _ready() -> void:
 	move_child(cave, 0)
 	cave.build(self)
 
+	# re-skin the flat grass/dirt polygons with blackstone block mixtures
+	_blackstone_ground()
+
 	var ghosts_node := Node2D.new()
 	ghosts_node.name = "Ghosts"
 	add_child(ghosts_node)
@@ -63,6 +68,88 @@ func _ready() -> void:
 		get_viewport().get_texture().get_image().save_png(
 			"D:/Roblox/opencode/tdy/_hunt/shot_cave.png")
 		get_tree().quit()
+
+
+# ================================================= blackstone ground skins ==
+# The levels draw their grass/dirt as flat-color Polygon2D nodes named "*Vis".
+# This hides each one and re-draws the same rect as a mixture of Minecraft
+# blocks: polished blackstone bricks as the base, with cracked polished
+# blackstone bricks and gilded blackstone sprinkled through it. The sprinkle
+# is seeded per rect so a given patch always looks the same.
+
+const MIX_CRACKED := 0.22   # share of cracked polished blackstone
+const MIX_GILDED := 0.10    # share of gilded blackstone
+
+
+func _block_tex_32(path: String) -> Texture2D:
+	var src: Texture2D = load(path)
+	var img: Image = src.get_image()
+	if img.is_compressed():
+		img.decompress()
+	img.convert(Image.FORMAT_RGBA8)
+	img.resize(int(BLOCK_PX), int(BLOCK_PX), Image.INTERPOLATE_NEAREST)
+	return ImageTexture.create_from_image(img)
+
+
+func _blackstone_ground() -> void:
+	var base := _block_tex_32(TEX_BLOCK)
+	var cracked := _block_tex_32(TEX_BLOCK_CRACKED)
+	var gilded := _block_tex_32(TEX_BLOCK_GILDED)
+	var rng := RandomNumberGenerator.new()
+	for poly in _ground_polys(self):
+		var rect := _poly_rect(poly)
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+			continue
+		var parent: Node = poly.get_parent()
+		var idx: int = poly.get_index()
+		poly.visible = false   # keep it for collision reference; draw blocks
+
+		var slab := Sprite2D.new()
+		slab.texture = base
+		slab.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		slab.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		slab.region_enabled = true
+		slab.region_rect = Rect2(Vector2.ZERO, rect.size)
+		slab.centered = false
+		slab.position = rect.position
+		parent.add_child(slab)
+		parent.move_child(slab, idx)   # exact same slot in the draw order
+
+		# sprinkle cracked / gilded blocks over the base (deterministic)
+		rng.seed = hash(rect.position) + 31 * hash(rect.size)
+		var cols := int(rect.size.x / BLOCK_PX)
+		var rows := int(rect.size.y / BLOCK_PX)
+		for cy in rows:
+			for cx in cols:
+				var roll := rng.randf()
+				if roll >= MIX_CRACKED + MIX_GILDED:
+					continue
+				var acc := Sprite2D.new()
+				acc.texture = gilded if roll < MIX_GILDED else cracked
+				acc.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+				acc.centered = false
+				acc.position = rect.position + Vector2(cx, cy) * BLOCK_PX
+				parent.add_child(acc)
+				parent.move_child(acc, idx + 1)   # above the slab, below gameplay
+
+
+# every Polygon2D named "*Vis" that is a direct child of the level root
+func _ground_polys(root: Node) -> Array:
+	var out: Array = []
+	for child in root.get_children():
+		if child is Polygon2D and str(child.name).ends_with("Vis"):
+			out.append(child)
+	return out
+
+
+# axis-aligned bounding rect of a polygon (all ground polys are rects)
+func _poly_rect(poly: Polygon2D) -> Rect2:
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for p in poly.polygon:
+		lo = lo.min(p)
+		hi = hi.max(p)
+	return Rect2(lo, hi - lo)
 
 
 # ==================================================== TV + blackstone frame ==
