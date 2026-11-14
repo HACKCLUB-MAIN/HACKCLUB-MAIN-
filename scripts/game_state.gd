@@ -32,6 +32,8 @@ var keybinds := {}               # action -> keycode (populated from DEFAULT_KEY
 
 var deaths := 0                  # total deaths, flavour
 
+signal coins_changed(total: int)
+
 # --- shop / wallet ----------------------------------------------------------
 var coins := 0                   # wallet — filled by the coins gathered in levels
 var owned_skins: Array = ["scout"]
@@ -63,6 +65,7 @@ func speed_mult() -> float:
 func add_coins(n: int) -> void:
 	coins += maxi(n, 0)
 	_save()
+	coins_changed.emit(coins)
 
 func next_heart_price() -> int:
 	return HEART_PRICES[extra_hearts] if extra_hearts < HEART_PRICES.size() else -1
@@ -77,6 +80,7 @@ func buy_skin(id: String) -> bool:
 	owned_skins.append(id)
 	equipped_skin = id
 	_save()
+	coins_changed.emit(coins)
 	return true
 
 func equip_skin(id: String) -> bool:
@@ -94,6 +98,7 @@ func buy_heart() -> bool:
 	coins -= HEART_PRICES[extra_hearts]
 	extra_hearts += 1
 	_save()
+	coins_changed.emit(coins)
 	return true
 
 func buy_doubler() -> bool:
@@ -102,6 +107,7 @@ func buy_doubler() -> bool:
 	coins -= DOUBLER_PRICE
 	coin_doubler = true
 	_save()
+	coins_changed.emit(coins)
 	return true
 
 func buy_boots() -> bool:
@@ -110,6 +116,7 @@ func buy_boots() -> bool:
 	coins -= BOOTS_PRICE
 	sprint_boots = true
 	_save()
+	coins_changed.emit(coins)
 	return true
 
 # ---- skins: palette-swapped player frames, generated once and cached -------

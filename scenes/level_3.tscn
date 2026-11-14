@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
 [ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
 [ext_resource type="PackedScene" path="res://scenes/lava.tscn" id="8_lava"]
+[ext_resource type="PackedScene" path="res://scenes/coin.tscn" id="9_coin"]
 
 [sub_resource type="RectangleShape2D" id="ground"]
 size = Vector2(1152, 128)
@@ -159,3 +160,21 @@ position = Vector2(1112, 392)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector2(160, 506)
+
+[node name="CoinLedge1" parent="." instance=ExtResource("9_coin")]
+position = Vector2(210, 396)
+
+[node name="CoinPlate1" parent="." instance=ExtResource("9_coin")]
+position = Vector2(264, 386)
+
+[node name="CoinHop" parent="." instance=ExtResource("9_coin")]
+position = Vector2(650, 398)
+
+[node name="CoinLedge2" parent="." instance=ExtResource("9_coin")]
+position = Vector2(790, 396)
+
+[node name="CoinGate" parent="." instance=ExtResource("9_coin")]
+position = Vector2(980, 254)
+
+[node name="CoinFinal" parent="." instance=ExtResource("9_coin")]
+position = Vector2(1080, 466)

@@ -46,9 +46,37 @@ func _apply() -> void:
 	if now_pressed == is_pressed:
 		return
 	is_pressed = now_pressed
+	_press_anim(now_pressed)
 	visual.modulate = Color(0.35, 1.0, 0.45) if is_pressed else Color(1.0, 1.0, 1.0)
+	if is_pressed:
+		Juice.play("plate_on", 1.0, -4.0)
+		Juice.add_trauma(0.12)
+	else:
+		Juice.play("plate_off", 1.0, -8.0)
 	pressed_changed.emit(is_pressed)
 	for path in targets:
 		var target := get_node_or_null(path)
 		if target != null and target.has_method("set_activated"):
 			target.set_activated(is_pressed)
+
+
+## Press: the plate dips down with a pop. Release: springs back up.
+func _press_anim(pressed: bool) -> void:
+	if not visual.has_meta("base_scale"):
+		visual.set_meta("base_scale", visual.scale)
+	var base: Vector2 = visual.get_meta("base_scale")
+	var old = visual.get_meta("anim_tween", null)
+	if old is Tween and (old as Tween).is_valid():
+		(old as Tween).kill()
+	var tw: Tween
+	if pressed:
+		visual.scale = base * Vector2(1.15, 0.6)
+		tw = visual.create_tween()
+		tw.tween_property(visual, "scale", base * Vector2(1.05, 0.7), 0.12)\
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	else:
+		visual.scale = base * Vector2(1.05, 0.7)
+		tw = visual.create_tween()
+		tw.tween_property(visual, "scale", base, 0.3)\
+			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	visual.set_meta("anim_tween", tw)
