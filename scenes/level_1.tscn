@@ -1,0 +1,117 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_spikes"]
+[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
+[ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
+[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
+
+[sub_resource type="RectangleShape2D" id="ground_a"]
+size = Vector2(512, 128)
+
+[sub_resource type="RectangleShape2D" id="ground_b"]
+size = Vector2(512, 128)
+
+[sub_resource type="RectangleShape2D" id="hop_platform"]
+size = Vector2(128, 16)
+
+[sub_resource type="RectangleShape2D" id="ledge"]
+size = Vector2(252, 16)
+
+[sub_resource type="RectangleShape2D" id="border_wall"]
+size = Vector2(16, 128)
+
+[sub_resource type="RectangleShape2D" id="pit_kill"]
+size = Vector2(140, 96)
+
+[sub_resource type="RectangleShape2D" id="safety_kill"]
+size = Vector2(1400, 80)
+
+[node name="Level1" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="World" type="StaticBody2D" parent="."]
+
+[node name="GroundA" type="CollisionShape2D" parent="World"]
+position = Vector2(256, 584)
+shape = SubResource("ground_a")
+
+[node name="GroundB" type="CollisionShape2D" parent="World"]
+position = Vector2(896, 584)
+shape = SubResource("ground_b")
+
+[node name="HopPlatform" type="CollisionShape2D" parent="World"]
+position = Vector2(576, 448)
+shape = SubResource("hop_platform")
+
+[node name="Ledge" type="CollisionShape2D" parent="World"]
+position = Vector2(262, 448)
+shape = SubResource("ledge")
+
+[node name="WallL" type="CollisionShape2D" parent="World"]
+position = Vector2(8, 456)
+shape = SubResource("border_wall")
+
+[node name="WallR" type="CollisionShape2D" parent="World"]
+position = Vector2(1144, 456)
+shape = SubResource("border_wall")
+
+[node name="GroundAVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 520, 512, 520, 512, 648, 0, 648)
+
+[node name="GroundBVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(640, 520, 1152, 520, 1152, 648, 640, 648)
+
+[node name="HopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(512, 440, 640, 440, 640, 456, 512, 456)
+
+[node name="LedgeVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(136, 440, 388, 440, 388, 456, 136, 456)
+
+[node name="WallLVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
+
+[node name="WallRVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+
+[node name="PitDeco" type="Polygon2D" parent="."]
+color = Color(0.78, 0.14, 0.14, 1)
+polygon = PackedVector2Array(512, 648, 512, 620, 520, 598, 528, 620, 536, 598, 544, 620, 552, 598, 560, 620, 568, 598, 576, 620, 584, 598, 592, 620, 600, 598, 608, 620, 616, 598, 624, 620, 632, 598, 640, 620, 640, 648)
+
+[node name="Pit" parent="." instance=ExtResource("7_kill")]
+position = Vector2(576, 600)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="Pit" index="0"]
+shape = SubResource("pit_kill")
+
+[node name="Safety" parent="." instance=ExtResource("7_kill")]
+position = Vector2(576, 700)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="Safety" index="0"]
+shape = SubResource("safety_kill")
+
+[node name="Plate1" parent="." instance=ExtResource("3_plate")]
+position = Vector2(240, 434)
+targets = Array[NodePath]([NodePath("../Gate1")])
+
+[node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
+position = Vector2(352, 440)
+
+[node name="Gate1" parent="." instance=ExtResource("5_gate")]
+position = Vector2(816, 408)
+
+[node name="ExitDoor" parent="." instance=ExtResource("6_door")]
+position = Vector2(1040, 494)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(64, 506)

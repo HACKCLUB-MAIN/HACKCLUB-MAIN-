@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ghost.gd" id="1_ghost"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(20, 28)
+
+[node name="Ghost" type="Area2D" groups=["ghost"]]
+monitoring = false
+script = ExtResource("1_ghost")
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.4, 0.9, 1, 0.6)
+polygon = PackedVector2Array(-10, -14, 10, -14, 10, 14, -10, 14)

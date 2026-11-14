@@ -1,0 +1,125 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_spikes"]
+[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
+[ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
+[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
+
+[sub_resource type="RectangleShape2D" id="ground"]
+size = Vector2(1152, 128)
+
+[sub_resource type="RectangleShape2D" id="ledge"]
+size = Vector2(252, 16)
+
+[sub_resource type="RectangleShape2D" id="ledge2"]
+size = Vector2(176, 16)
+
+[sub_resource type="RectangleShape2D" id="hop_platform"]
+size = Vector2(128, 16)
+
+[sub_resource type="RectangleShape2D" id="spike_kill"]
+size = Vector2(140, 140)
+
+[sub_resource type="RectangleShape2D" id="border_wall"]
+size = Vector2(16, 128)
+
+[sub_resource type="RectangleShape2D" id="safety_kill"]
+size = Vector2(1400, 80)
+
+[node name="Level3" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="World" type="StaticBody2D" parent="."]
+
+[node name="Ground" type="CollisionShape2D" parent="World"]
+position = Vector2(576, 584)
+shape = SubResource("ground")
+
+[node name="Ledge1" type="CollisionShape2D" parent="World"]
+position = Vector2(262, 448)
+shape = SubResource("ledge")
+
+[node name="Ledge2" type="CollisionShape2D" parent="World"]
+position = Vector2(840, 448)
+shape = SubResource("ledge2")
+
+[node name="HopPlatform" type="CollisionShape2D" parent="World"]
+position = Vector2(650, 448)
+shape = SubResource("hop_platform")
+
+[node name="WallL" type="CollisionShape2D" parent="World"]
+position = Vector2(8, 456)
+shape = SubResource("border_wall")
+
+[node name="WallR" type="CollisionShape2D" parent="World"]
+position = Vector2(1144, 456)
+shape = SubResource("border_wall")
+
+[node name="GroundVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 520, 1152, 520, 1152, 648, 0, 648)
+
+[node name="Ledge1Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(136, 440, 388, 440, 388, 456, 136, 456)
+
+[node name="Ledge2Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(752, 440, 928, 440, 928, 456, 752, 456)
+
+[node name="HopVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(586, 440, 714, 440, 714, 456, 586, 456)
+
+[node name="WallLVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
+
+[node name="WallRVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+
+[node name="SpikeDeco" type="Polygon2D" parent="."]
+color = Color(0.78, 0.14, 0.14, 1)
+polygon = PackedVector2Array(586, 520, 594, 494, 602, 520, 610, 494, 618, 520, 626, 494, 634, 520, 642, 494, 650, 520, 658, 494, 666, 520, 674, 494, 682, 520, 690, 494, 698, 520, 706, 494, 714, 520)
+
+[node name="SpikeKill" parent="." instance=ExtResource("7_kill")]
+position = Vector2(650, 560)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="SpikeKill" index="0"]
+shape = SubResource("spike_kill")
+
+[node name="Safety" parent="." instance=ExtResource("7_kill")]
+position = Vector2(576, 700)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="Safety" index="0"]
+shape = SubResource("safety_kill")
+
+[node name="Plate1" parent="." instance=ExtResource("3_plate")]
+position = Vector2(240, 434)
+targets = Array[NodePath]([NodePath("../Gate1")])
+
+[node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
+position = Vector2(352, 440)
+
+[node name="Gate1" parent="." instance=ExtResource("5_gate")]
+position = Vector2(520, 408)
+
+[node name="Plate2" parent="." instance=ExtResource("3_plate")]
+position = Vector2(800, 434)
+targets = Array[NodePath]([NodePath("../Gate2")])
+
+[node name="Gate2" parent="." instance=ExtResource("5_gate")]
+position = Vector2(980, 408)
+auto_close_delay = 4.0
+
+[node name="ExitDoor" parent="." instance=ExtResource("6_door")]
+position = Vector2(1080, 494)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(64, 506)

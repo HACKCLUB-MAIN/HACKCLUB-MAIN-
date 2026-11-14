@@ -1,0 +1,143 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="PackedScene" path="res://scenes/spikes.tscn" id="4_spikes"]
+[ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="5_gate"]
+[ext_resource type="PackedScene" path="res://scenes/exit_door.tscn" id="6_door"]
+[ext_resource type="PackedScene" path="res://scenes/killzone.tscn" id="7_kill"]
+[ext_resource type="PackedScene" path="res://scenes/bounce_pad.tscn" id="8_bounce"]
+
+[sub_resource type="RectangleShape2D" id="ground_a"]
+size = Vector2(640, 128)
+
+[sub_resource type="RectangleShape2D" id="ground_b"]
+size = Vector2(416, 128)
+
+[sub_resource type="RectangleShape2D" id="pit_floor"]
+size = Vector2(96, 16)
+
+[sub_resource type="RectangleShape2D" id="step1"]
+size = Vector2(96, 16)
+
+[sub_resource type="RectangleShape2D" id="step2"]
+size = Vector2(96, 16)
+
+[sub_resource type="RectangleShape2D" id="high_platform"]
+size = Vector2(208, 16)
+
+[sub_resource type="RectangleShape2D" id="border_wall"]
+size = Vector2(16, 128)
+
+[sub_resource type="RectangleShape2D" id="spike_kill"]
+size = Vector2(80, 140)
+
+[sub_resource type="RectangleShape2D" id="safety_kill"]
+size = Vector2(1400, 80)
+
+[node name="Level2" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="World" type="StaticBody2D" parent="."]
+
+[node name="GroundA" type="CollisionShape2D" parent="World"]
+position = Vector2(320, 584)
+shape = SubResource("ground_a")
+
+[node name="GroundB" type="CollisionShape2D" parent="World"]
+position = Vector2(944, 584)
+shape = SubResource("ground_b")
+
+[node name="PitFloor" type="CollisionShape2D" parent="World"]
+position = Vector2(688, 640)
+shape = SubResource("pit_floor")
+
+[node name="Step1" type="CollisionShape2D" parent="World"]
+position = Vector2(300, 472)
+shape = SubResource("step1")
+
+[node name="Step2" type="CollisionShape2D" parent="World"]
+position = Vector2(420, 408)
+shape = SubResource("step2")
+
+[node name="HighPlatform" type="CollisionShape2D" parent="World"]
+position = Vector2(500, 344)
+shape = SubResource("high_platform")
+
+[node name="WallL" type="CollisionShape2D" parent="World"]
+position = Vector2(8, 456)
+shape = SubResource("border_wall")
+
+[node name="WallR" type="CollisionShape2D" parent="World"]
+position = Vector2(1144, 456)
+shape = SubResource("border_wall")
+
+[node name="GroundAVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 520, 640, 520, 640, 648, 0, 648)
+
+[node name="GroundBVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(736, 520, 1152, 520, 1152, 648, 736, 648)
+
+[node name="PitFloorVis" type="Polygon2D" parent="."]
+color = Color(0.32, 0.22, 0.16, 1)
+polygon = PackedVector2Array(640, 632, 736, 632, 736, 648, 640, 648)
+
+[node name="Step1Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(252, 464, 348, 464, 348, 480, 252, 480)
+
+[node name="Step2Vis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(372, 400, 468, 400, 468, 416, 372, 416)
+
+[node name="HighVis" type="Polygon2D" parent="."]
+color = Color(0.5, 0.38, 0.27, 1)
+polygon = PackedVector2Array(396, 336, 604, 336, 604, 352, 396, 352)
+
+[node name="WallLVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(0, 392, 16, 392, 16, 520, 0, 520)
+
+[node name="WallRVis" type="Polygon2D" parent="."]
+color = Color(0.42, 0.3, 0.22, 1)
+polygon = PackedVector2Array(1136, 392, 1152, 392, 1152, 520, 1136, 520)
+
+[node name="SpikeDeco" type="Polygon2D" parent="."]
+color = Color(0.78, 0.14, 0.14, 1)
+polygon = PackedVector2Array(800, 520, 808, 494, 816, 520, 824, 494, 832, 520, 840, 494, 848, 520, 856, 494, 864, 520, 872, 494, 880, 520)
+
+[node name="SpikeKill" parent="." instance=ExtResource("7_kill")]
+position = Vector2(840, 560)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="SpikeKill" index="0"]
+shape = SubResource("spike_kill")
+
+[node name="Safety" parent="." instance=ExtResource("7_kill")]
+position = Vector2(576, 700)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Collision" parent="Safety" index="0"]
+shape = SubResource("safety_kill")
+
+[node name="PitBouncePad" parent="." instance=ExtResource("8_bounce")]
+position = Vector2(688, 628)
+
+[node name="Plate1" parent="." instance=ExtResource("3_plate")]
+position = Vector2(460, 330)
+targets = Array[NodePath]([NodePath("../Gate1")])
+
+[node name="Spikes1" parent="." instance=ExtResource("4_spikes")]
+position = Vector2(560, 336)
+
+[node name="Gate1" parent="." instance=ExtResource("5_gate")]
+position = Vector2(900, 408)
+
+[node name="ExitDoor" parent="." instance=ExtResource("6_door")]
+position = Vector2(1040, 494)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(64, 506)
